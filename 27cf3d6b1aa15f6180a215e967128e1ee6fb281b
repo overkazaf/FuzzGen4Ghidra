@@ -1,0 +1,391 @@
+src/main/java/fuzzgen4ghidra/actions/ScanTargetsAction.java
+  4fcb61d4aa5a360b 1-135
+test/test_scorer.py
+  9dd49583e9618497 1-34
+python/fuzzgen4ghidra_engine/__main__.py
+  92550736cb2ed0ab 1-2
+test/test_params.py
+  187ca9482cfc0705 1-53
+src/main/java/fuzzgen4ghidra/FuzzGen4GhidraPlugin.java
+  4fcb61d4aa5a360b 1-96
+Module.manifest
+  c245f3515ecc8911 1
+python/fuzzgen4ghidra_engine/scorer.py
+  9dd49583e9618497 1-97
+extension.properties
+  c245f3515ecc8911 1-5
+test/test_integration.py
+  01aad73dc775a2d0 1-5,7-30,38,40-48,53-72
+  c245f3515ecc8911 6,31-37,39,49-52
+python/fuzzgen4ghidra_engine/protocol.py
+  ddabf7b8f3710782 1-40
+python/fuzzgen4ghidra_engine/server.py
+  92550736cb2ed0ab 1-97
+test/test_models.py
+  1cb6aedf7550fd15 1-41
+python/fuzzgen4ghidra_engine/templates/types.h.j2
+  e20cc0fde64e8dc5 1-18
+src/main/java/fuzzgen4ghidra/actions/GenerateHarnessAction.java
+  4fcb61d4aa5a360b 1-148
+python/fuzzgen4ghidra_engine/models.py
+  1cb6aedf7550fd15 1-88
+python/fuzzgen4ghidra_engine/templates/afl_harness.c.j2
+  e20cc0fde64e8dc5 1-59
+settings.gradle
+  c245f3515ecc8911 1
+test/test_harness.py
+  e20cc0fde64e8dc5 1-40
+build.gradle
+  c245f3515ecc8911 1-19
+test/test_protocol.py
+  ddabf7b8f3710782 1-25
+python/fuzzgen4ghidra_engine/params.py
+  187ca9482cfc0705 1-67
+test/test_engine.py
+  92550736cb2ed0ab 1-29
+src/main/java/fuzzgen4ghidra/engine/EngineProtocol.java
+  de1bf5fc5e93f420 1-107
+python/fuzzgen4ghidra_engine/harness.py
+  e20cc0fde64e8dc5 1-137
+python/fuzzgen4ghidra_engine/engine.py
+  92550736cb2ed0ab 1-13,15-19,21-130
+  c245f3515ecc8911 14,20
+src/main/java/fuzzgen4ghidra/ui/HarnessPreviewDialog.java
+  4fcb61d4aa5a360b 1-135
+src/main/java/fuzzgen4ghidra/engine/EngineManager.java
+  de1bf5fc5e93f420 1-251
+python/fuzzgen4ghidra_engine/templates/libfuzzer_harness.c.j2
+  e20cc0fde64e8dc5 1-45
+.gitignore
+  c245f3515ecc8911 1-14
+python/fuzzgen4ghidra_engine/templates/Makefile.j2
+  e20cc0fde64e8dc5 1-38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8-ntes.9",
+  "base_commit_sha": "27cf3d6b1aa15f6180a215e967128e1ee6fb281b",
+  "prompts": {
+    "01aad73dc775a2d0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a9a84b36-be09-473d-ba25-19431e4d3179",
+        "model": "deepseek-flash"
+      },
+      "human_author": "nongjiawu",
+      "messages": [],
+      "total_additions": 67,
+      "total_deletions": 0,
+      "accepted_lines": 59,
+      "overriden_lines": 0,
+      "per_file_stats": {
+        "test/test_integration.py": {
+          "additions": 67,
+          "accepted_lines": 59
+        }
+      }
+    },
+    "187ca9482cfc0705": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d6b9f133-c3bf-4988-b8e4-78b3e0f6b860",
+        "model": "deepseek-flash"
+      },
+      "human_author": "nongjiawu",
+      "messages": [],
+      "total_additions": 120,
+      "total_deletions": 0,
+      "accepted_lines": 120,
+      "overriden_lines": 0,
+      "per_file_stats": {
+        "test/test_params.py": {
+          "additions": 53,
+          "accepted_lines": 53
+        },
+        "python/fuzzgen4ghidra_engine/params.py": {
+          "additions": 67,
+          "accepted_lines": 67
+        }
+      }
+    },
+    "1cb6aedf7550fd15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1390a7bf-77fa-46fb-8631-34997e92286a",
+        "model": "deepseek-flash"
+      },
+      "human_author": "nongjiawu",
+      "messages": [],
+      "total_additions": 129,
+      "total_deletions": 0,
+      "accepted_lines": 129,
+      "overriden_lines": 0,
+      "per_file_stats": {
+        "test/test_models.py": {
+          "additions": 41,
+          "accepted_lines": 41
+        },
+        "python/fuzzgen4ghidra_engine/models.py": {
+          "additions": 88,
+          "accepted_lines": 88
+        }
+      }
+    },
+    "4fcb61d4aa5a360b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2401fce9-0cde-48a5-9714-3161186b3aa5",
+        "model": "deepseek-flash"
+      },
+      "human_author": "nongjiawu",
+      "messages": [],
+      "total_additions": 514,
+      "total_deletions": 0,
+      "accepted_lines": 514,
+      "overriden_lines": 0,
+      "per_file_stats": {
+        "src/main/java/fuzzgen4ghidra/actions/GenerateHarnessAction.java": {
+          "additions": 148,
+          "accepted_lines": 148
+        },
+        "src/main/java/fuzzgen4ghidra/FuzzGen4GhidraPlugin.java": {
+          "additions": 96,
+          "accepted_lines": 96
+        },
+        "src/main/java/fuzzgen4ghidra/ui/HarnessPreviewDialog.java": {
+          "additions": 135,
+          "accepted_lines": 135
+        },
+        "src/main/java/fuzzgen4ghidra/actions/ScanTargetsAction.java": {
+          "additions": 135,
+          "accepted_lines": 135
+        }
+      }
+    },
+    "92550736cb2ed0ab": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "da4ca5d7-416f-4b8f-91a8-9e958dd135be",
+        "model": "deepseek-flash"
+      },
+      "human_author": "nongjiawu",
+      "messages": [],
+      "total_additions": 259,
+      "total_deletions": 0,
+      "accepted_lines": 256,
+      "overriden_lines": 0,
+      "per_file_stats": {
+        "test/test_engine.py": {
+          "additions": 29,
+          "accepted_lines": 29
+        },
+        "python/fuzzgen4ghidra_engine/engine.py": {
+          "additions": 131,
+          "accepted_lines": 128
+        },
+        "python/fuzzgen4ghidra_engine/server.py": {
+          "additions": 97,
+          "accepted_lines": 97
+        },
+        "python/fuzzgen4ghidra_engine/__main__.py": {
+          "additions": 2,
+          "accepted_lines": 2
+        }
+      }
+    },
+    "9dd49583e9618497": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71933f3e-904b-44d5-9be7-469b3f8bbf50",
+        "model": "deepseek-flash"
+      },
+      "human_author": "nongjiawu",
+      "messages": [],
+      "total_additions": 131,
+      "total_deletions": 0,
+      "accepted_lines": 131,
+      "overriden_lines": 0,
+      "per_file_stats": {
+        "python/fuzzgen4ghidra_engine/scorer.py": {
+          "additions": 97,
+          "accepted_lines": 97
+        },
+        "test/test_scorer.py": {
+          "additions": 34,
+          "accepted_lines": 34
+        }
+      }
+    },
+    "c245f3515ecc8911": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6f44316b-dc24-49c6-aaa8-c37c5db6b27c",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "nongjiawu",
+      "messages": [],
+      "total_additions": 2404,
+      "total_deletions": 18,
+      "accepted_lines": 2397,
+      "overriden_lines": 0,
+      "per_file_stats": {
+        "settings.gradle": {
+          "additions": 1,
+          "accepted_lines": 1
+        },
+        ".tasks/task2-models.md": {
+          "additions": 151,
+          "accepted_lines": 151
+        },
+        ".tasks/task5-harness.md": {
+          "additions": 395,
+          "accepted_lines": 395
+        },
+        ".gitignore": {
+          "additions": 14,
+          "accepted_lines": 14
+        },
+        ".tasks/task8-java-engine.md": {
+          "additions": 386,
+          "accepted_lines": 386
+        },
+        ".tasks/task4-params.md": {
+          "additions": 144,
+          "accepted_lines": 144
+        },
+        ".tasks/task6-engine.md": {
+          "additions": 299,
+          "accepted_lines": 299
+        },
+        "Module.manifest": {
+          "additions": 1,
+          "accepted_lines": 1
+        },
+        ".tasks/task1-protocol.md": {
+          "additions": 93,
+          "accepted_lines": 93
+        },
+        "python/fuzzgen4ghidra_engine/engine.py": {
+          "additions": 2,
+          "deletions": 3,
+          "accepted_lines": 2
+        },
+        "build.gradle": {
+          "additions": 19,
+          "accepted_lines": 19
+        },
+        "extension.properties": {
+          "additions": 5,
+          "accepted_lines": 5
+        },
+        ".tasks/task3-scorer.md": {
+          "additions": 155,
+          "accepted_lines": 155
+        },
+        "CLAUDE.md": {
+          "additions": 84,
+          "deletions": 7,
+          "accepted_lines": 77
+        },
+        "test/test_integration.py": {
+          "additions": 13,
+          "deletions": 8,
+          "accepted_lines": 13
+        },
+        ".tasks/task9-java-plugin.md": {
+          "additions": 554,
+          "accepted_lines": 554
+        },
+        ".tasks/task10-integration.md": {
+          "additions": 88,
+          "accepted_lines": 88
+        }
+      }
+    },
+    "ddabf7b8f3710782": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "155b7d49-58a9-46a0-8eba-7e46367d2af5",
+        "model": "deepseek-flash"
+      },
+      "human_author": "nongjiawu",
+      "messages": [],
+      "total_additions": 65,
+      "total_deletions": 0,
+      "accepted_lines": 65,
+      "overriden_lines": 0,
+      "per_file_stats": {
+        "test/test_protocol.py": {
+          "additions": 25,
+          "accepted_lines": 25
+        },
+        "python/fuzzgen4ghidra_engine/protocol.py": {
+          "additions": 40,
+          "accepted_lines": 40
+        }
+      }
+    },
+    "de1bf5fc5e93f420": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e744803b-f9ba-46f3-a160-8cfa9d748399",
+        "model": "deepseek-flash"
+      },
+      "human_author": "nongjiawu",
+      "messages": [],
+      "total_additions": 358,
+      "total_deletions": 0,
+      "accepted_lines": 358,
+      "overriden_lines": 0,
+      "per_file_stats": {
+        "src/main/java/fuzzgen4ghidra/engine/EngineProtocol.java": {
+          "additions": 107,
+          "accepted_lines": 107
+        },
+        "src/main/java/fuzzgen4ghidra/engine/EngineManager.java": {
+          "additions": 251,
+          "accepted_lines": 251
+        }
+      }
+    },
+    "e20cc0fde64e8dc5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a7bb1a01-c858-4f3e-9b16-886f5572258a",
+        "model": "deepseek-flash"
+      },
+      "human_author": "nongjiawu",
+      "messages": [],
+      "total_additions": 337,
+      "total_deletions": 0,
+      "accepted_lines": 337,
+      "overriden_lines": 0,
+      "per_file_stats": {
+        "python/fuzzgen4ghidra_engine/templates/types.h.j2": {
+          "additions": 18,
+          "accepted_lines": 18
+        },
+        "python/fuzzgen4ghidra_engine/templates/afl_harness.c.j2": {
+          "additions": 59,
+          "accepted_lines": 59
+        },
+        "python/fuzzgen4ghidra_engine/templates/libfuzzer_harness.c.j2": {
+          "additions": 45,
+          "accepted_lines": 45
+        },
+        "python/fuzzgen4ghidra_engine/harness.py": {
+          "additions": 137,
+          "accepted_lines": 137
+        },
+        "test/test_harness.py": {
+          "additions": 40,
+          "accepted_lines": 40
+        },
+        "python/fuzzgen4ghidra_engine/templates/Makefile.j2": {
+          "additions": 38,
+          "accepted_lines": 38
+        }
+      }
+    }
+  }
+}
