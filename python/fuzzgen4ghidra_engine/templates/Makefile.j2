@@ -1,0 +1,38 @@
+# FuzzGen4Ghidra - Makefile for {{ func_name }} harness
+# Target: {{ target_binary }}
+
+CC ?= gcc
+CFLAGS = -g -O0 -fsanitize=address,undefined -fno-omit-frame-pointer
+LDFLAGS = -ldl
+TARGET_LIB = {{ target_binary }}
+
+{% if fmt == "afl" %}
+AFL_CC ?= afl-gcc
+HARNESS = harness_{{ func_name }}
+
+all: $(HARNESS)
+
+$(HARNESS): harness_{{ func_name }}.c types.h
+	$(AFL_CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+fuzz: $(HARNESS)
+	@mkdir -p findings
+	afl-fuzz -i seeds -o findings -- ./$(HARNESS) @@
+
+{% elif fmt == "libfuzzer" %}
+HARNESS = harness_{{ func_name }}
+
+all: $(HARNESS)
+
+$(HARNESS): harness_{{ func_name }}.c types.h
+	clang $(CFLAGS) -fsanitize=fuzzer -o $@ $< $(LDFLAGS)
+
+fuzz: $(HARNESS)
+	@mkdir -p corpus
+	./$(HARNESS) corpus/ -max_len=4096
+
+{% endif %}
+clean:
+	rm -f $(HARNESS)
+
+.PHONY: all fuzz clean

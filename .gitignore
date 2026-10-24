@@ -1,0 +1,14 @@
+build/
+dist/
+.gradle/
+.venv/
+__pycache__/
+*.class
+*.pyc
+*.lock
+*.lock~
+*.gpr
+*.rep/
+.tasks/
+CLAUDE.md
+.pytest_cache/
