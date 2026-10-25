@@ -54,11 +54,9 @@ Load Binary → Scan & Score → Recover Params → Generate Harness
 
 <!-- Replace with real screenshots after installing in Ghidra -->
 
-| Context Menu | Harness Preview | Scan Results |
-|:---:|:---:|:---:|
-| ![context-menu](docs/images/context-menu.png) | ![harness-preview](docs/images/harness-preview.png) | ![scan-results](docs/images/scan-results.png) |
-
-> Screenshots are mockups. Replace with actual Ghidra screenshots after installation.
+| Harness Preview | Scan Results |
+|:---:|:---:|
+| ![harness-preview](docs/images/harness-preview.png) | ![scan-results](docs/images/scan-results.png) |
 
 ### Requirements
 
@@ -117,6 +115,107 @@ The plugin automatically locates `.venv/bin/python3` by searching parent directo
 1. Menu bar → **FuzzGen4Ghidra** → **Scan Fuzz Targets**
 2. The engine scores every non-trivial function and returns a ranked list
 3. Top targets show their score, block count, and reasons (dangerous calls, buffer params, etc.)
+
+### Quick Start Walkthrough
+
+A complete step-by-step guide from installation to fuzzing.
+
+#### Step 1: Build and install the extension
+
+```bash
+# Build (replace paths with your actual paths)
+cd FuzzGen4Ghidra
+JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-23.jdk/Contents/Home \
+  gradle buildExtension \
+  -PGHIDRA_INSTALL_DIR=$HOME/ghidra_11.4.3_PUBLIC
+
+# The zip is now in dist/
+ls dist/ghidra_*_FuzzGen4Ghidra.zip
+```
+
+#### Step 2: Install in Ghidra
+
+1. Launch Ghidra (run `ghidraRun` from the Ghidra install directory)
+2. In the **Project Window**, go to **File → Install Extensions...**
+3. Click the green **+** button in the top-right corner
+4. Navigate to and select `dist/ghidra_*_FuzzGen4Ghidra.zip`
+5. You should see **FuzzGen4Ghidra** appear in the extensions list with a checkbox
+6. Click **OK**, then **restart Ghidra** when prompted
+
+#### Step 3: Set up the Python engine environment
+
+```bash
+# Create a venv in the FuzzGen4Ghidra directory (or its parent)
+cd FuzzGen4Ghidra
+python3 -m venv .venv
+source .venv/bin/activate
+pip install angr jinja2
+```
+
+The Java plugin automatically searches for `.venv/bin/python3` starting from the project directory and walking up parent directories.
+
+#### Step 4: Import a binary and enable the plugin
+
+1. In the Ghidra Project Window, go to **File → Import File...**
+2. Select a binary to analyze (e.g., a shared library like `libparser.so` or an ELF executable)
+3. Accept the default import options and click **OK**
+4. Double-click the imported file to open it in **CodeBrowser**
+5. When prompted "Analyze now?", click **Yes** and accept the default analyzers — this runs Ghidra's auto-analysis including the decompiler
+6. If the plugin is not yet enabled: go to **File → Configure...**, find the **FuzzGen4Ghidra** section, and check the box to enable it
+
+After enabling, two new features appear:
+- **Right-click context menu** → "FuzzGen4Ghidra" → "Generate Fuzz Harness"
+- **Menu bar** → "FuzzGen4Ghidra" → "Scan Fuzz Targets"
+
+#### Step 5: Scan for fuzz targets
+
+1. In CodeBrowser, go to the menu bar: **FuzzGen4Ghidra → Scan Fuzz Targets**
+2. The plugin starts the Python engine automatically (first run may take a few seconds)
+3. A progress dialog shows the engine analyzing each function via angr's CFG
+4. When complete, a results table appears showing the top-20 fuzz targets ranked by score
+5. Each row shows: function name, address, overall score, block count, and scoring reasons
+
+Use this to identify the best functions to fuzz — look for high scores with dangerous calls (`memcpy`, `strcpy`, etc.) and buffer parameters.
+
+#### Step 6: Generate a fuzz harness
+
+1. In the **Listing** or **Decompiler** view, click on the function you want to fuzz
+2. **Right-click → FuzzGen4Ghidra → Generate Fuzz Harness**
+3. The **Harness Preview** dialog opens with the generated C source code
+4. Use the **Format** dropdown at the top to switch between:
+   - **afl** — Generates a `main()` that reads from a file (for AFL++)
+   - **libfuzzer** — Generates `LLVMFuzzerTestOneInput()` (for libFuzzer/LLVM)
+5. Click **Copy to Clipboard** to copy the code, or
+6. Click **Save to Directory...** to export all files to a folder:
+   - `harness_<funcname>.c` — The harness source code
+   - `types.h` — Type definitions for the target's parameters
+   - `Makefile` — Ready-to-use build file for AFL++ or libFuzzer
+   - `seeds/seed_000` — Initial seed corpus file
+
+#### Step 7: Compile and run the fuzzer
+
+```bash
+cd output_dir/
+
+# For AFL++:
+make           # Compiles with afl-gcc and AddressSanitizer
+make fuzz      # Starts afl-fuzz with the generated seed corpus
+
+# For libFuzzer:
+# (switch format to "libfuzzer" in the preview dialog and re-save)
+make           # Compiles with clang -fsanitize=fuzzer,address
+make fuzz      # Starts the libFuzzer binary
+```
+
+#### Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| "Engine not started" error | Check that `.venv/bin/python3` exists and has `angr` and `jinja2` installed |
+| Engine takes a long time | angr's CFG analysis is CPU-intensive; large binaries take longer |
+| No functions found in scan | The binary may be stripped or have no exported functions; try a shared library |
+| Harness won't compile | Make sure `afl-gcc` (AFL++) or `clang` (libFuzzer) is installed and in PATH |
+| "Generate Fuzz Harness" is greyed out | Make sure your cursor is positioned inside a function in the Listing/Decompiler view |
 
 ### Demo: Generating a harness
 
@@ -335,6 +434,107 @@ pip install angr jinja2
 1. 菜单栏 → **FuzzGen4Ghidra** → **Scan Fuzz Targets**
 2. 引擎对每个非平凡函数评分，返回排序列表
 3. 查看每个目标的评分、基本块数、评分原因
+
+### 完整使用教程
+
+从安装到 fuzz 的每一步详细指引。
+
+#### 第 1 步：编译并安装扩展
+
+```bash
+# 编译（替换为你实际的路径）
+cd FuzzGen4Ghidra
+JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-23.jdk/Contents/Home \
+  gradle buildExtension \
+  -PGHIDRA_INSTALL_DIR=$HOME/ghidra_11.4.3_PUBLIC
+
+# zip 文件生成在 dist/ 目录
+ls dist/ghidra_*_FuzzGen4Ghidra.zip
+```
+
+#### 第 2 步：安装到 Ghidra
+
+1. 启动 Ghidra（在 Ghidra 安装目录运行 `ghidraRun`）
+2. 在**项目窗口**中，打开 **File → Install Extensions...**
+3. 点击右上角绿色的 **+** 按钮
+4. 选择 `dist/ghidra_*_FuzzGen4Ghidra.zip`
+5. 列表中出现 **FuzzGen4Ghidra** 并勾选
+6. 点击 **OK**，根据提示**重启 Ghidra**
+
+#### 第 3 步：配置 Python 引擎环境
+
+```bash
+# 在 FuzzGen4Ghidra 目录或其父目录创建 venv
+cd FuzzGen4Ghidra
+python3 -m venv .venv
+source .venv/bin/activate
+pip install angr jinja2
+```
+
+Java 插件会自动在项目目录及父目录中查找 `.venv/bin/python3`。
+
+#### 第 4 步：导入二进制文件并启用插件
+
+1. 在 Ghidra 项目窗口，**File → Import File...**
+2. 选择要分析的二进制文件（如共享库 `libparser.so` 或 ELF 可执行文件）
+3. 使用默认导入选项，点击 **OK**
+4. 双击导入的文件，在 **CodeBrowser** 中打开
+5. 提示 "Analyze now?" 时点击 **Yes**，接受默认分析器 — Ghidra 会运行自动分析（包括反编译）
+6. 如果插件未启用：**File → Configure...**，找到 **FuzzGen4Ghidra** 并勾选
+
+启用后会看到两个新功能入口：
+- **右键菜单** → "FuzzGen4Ghidra" → "Generate Fuzz Harness"
+- **菜单栏** → "FuzzGen4Ghidra" → "Scan Fuzz Targets"
+
+#### 第 5 步：扫描 fuzz 目标
+
+1. 在 CodeBrowser 菜单栏：**FuzzGen4Ghidra → Scan Fuzz Targets**
+2. 插件自动启动 Python 引擎（首次运行可能需要几秒）
+3. 进度对话框显示 angr CFG 分析进度
+4. 完成后弹出结果表格，展示按评分排序的 Top-20 目标函数
+5. 每行包含：函数名、地址、综合评分、基本块数、评分原因
+
+利用此结果找到最适合 fuzz 的函数 — 关注高分且包含危险调用（`memcpy`、`strcpy` 等）和 buffer 参数的函数。
+
+#### 第 6 步：生成 fuzz harness
+
+1. 在 **Listing** 或 **Decompiler** 视图中，点击目标函数
+2. **右键 → FuzzGen4Ghidra → Generate Fuzz Harness**
+3. 弹出 **Harness Preview** 对话框，展示生成的 C 源码
+4. 用顶部 **Format** 下拉框切换格式：
+   - **afl** — 生成 `main()` 函数从文件读取输入（适用 AFL++）
+   - **libfuzzer** — 生成 `LLVMFuzzerTestOneInput()`（适用 libFuzzer/LLVM）
+5. 点击 **Copy to Clipboard** 复制代码，或
+6. 点击 **Save to Directory...** 将全部文件导出到一个目录：
+   - `harness_<函数名>.c` — harness 源码
+   - `types.h` — 目标函数参数的类型定义
+   - `Makefile` — 可直接使用的构建文件
+   - `seeds/seed_000` — 初始种子语料文件
+
+#### 第 7 步：编译并运行 fuzzer
+
+```bash
+cd output_dir/
+
+# AFL++ 模式：
+make           # 用 afl-gcc + ASan 编译
+make fuzz      # 启动 afl-fuzz，使用生成的种子语料
+
+# libFuzzer 模式：
+# （在预览对话框中切换为 "libfuzzer" 格式，重新保存）
+make           # 用 clang -fsanitize=fuzzer,address 编译
+make fuzz      # 启动 libFuzzer
+```
+
+#### 常见问题
+
+| 问题 | 解决方案 |
+|------|----------|
+| "Engine not started" 错误 | 检查 `.venv/bin/python3` 是否存在，且已安装 `angr` 和 `jinja2` |
+| 引擎启动很慢 | angr 的 CFG 分析是 CPU 密集型的，大型二进制文件需要更多时间 |
+| 扫描未发现函数 | 二进制可能被 strip 了或没有导出函数，尝试使用共享库 |
+| Harness 编译失败 | 确认已安装 `afl-gcc`（AFL++）或 `clang`（libFuzzer）并在 PATH 中 |
+| "Generate Fuzz Harness" 灰色不可点 | 确保光标在 Listing/Decompiler 视图中的某个函数内部 |
 
 ### 演示：从生成到 fuzzing
 

@@ -1,6 +1,14 @@
 import re
 from .models import ParamInfo, ParamType
 
+GHIDRA_TO_C_TYPE = {
+    "undefined": "uint8_t",
+    "undefined1": "uint8_t",
+    "undefined2": "uint16_t",
+    "undefined4": "uint32_t",
+    "undefined8": "uint64_t",
+}
+
 INT_TYPES = frozenset({
     "int", "uint", "long", "ulong", "short", "ushort", "char", "uchar",
     "int8_t", "uint8_t", "int16_t", "uint16_t", "int32_t", "uint32_t",
@@ -52,7 +60,9 @@ def recover_params_from_ghidra(ghidra_sig: dict) -> list[ParamInfo]:
     params_raw = ghidra_sig.get("params", [])
     results: list[ParamInfo] = []
     for i, p in enumerate(params_raw):
-        ptype = _classify_type(p.get("type", ""))
+        raw_type = p.get("type", "int")
+        c_type = GHIDRA_TO_C_TYPE.get(raw_type, raw_type)
+        ptype = _classify_type(raw_type)
         length_param = None
         if ptype == ParamType.BUFFER:
             length_param = _find_length_param(params_raw, i)
@@ -60,7 +70,7 @@ def recover_params_from_ghidra(ghidra_sig: dict) -> list[ParamInfo]:
             index=i,
             name=p.get("name", f"arg{i}"),
             type=ptype,
-            c_type=p.get("type", "int"),
+            c_type=c_type,
             size=p.get("size", 4),
             length_param=length_param,
         ))

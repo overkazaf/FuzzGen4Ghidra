@@ -202,11 +202,17 @@ public class EngineManager {
 	}
 
 	private String findPython() {
+		String envPython = System.getenv("FUZZGEN_PYTHON");
+		if (envPython != null && new File(envPython).isFile()) {
+			Msg.info(this, "Using FUZZGEN_PYTHON: " + envPython);
+			return envPython;
+		}
+
 		try {
 			ResourceFile moduleDir = Application.getModuleDataSubDirectory("");
 			File extRoot = moduleDir.getParentFile().getFile(false);
 			File dir = extRoot;
-			for (int i = 0; i < 5 && dir != null; i++) {
+			for (int i = 0; i < 8 && dir != null; i++) {
 				File venvPython = new File(dir, ".venv/bin/python3");
 				if (venvPython.isFile()) {
 					Msg.info(this, "Using venv Python: " + venvPython.getAbsolutePath());
