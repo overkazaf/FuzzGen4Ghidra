@@ -1,0 +1,80 @@
+python/fuzzgen4ghidra_engine/params.py
+  c245f3515ecc8911 4-11,63-65,73
+python/fuzzgen4ghidra_engine/templates/libfuzzer_harness.c.j2
+  c245f3515ecc8911 34
+README.md
+  c245f3515ecc8911 57-59,119-219,438-538
+src/main/java/fuzzgen4ghidra/engine/EngineManager.java
+  c245f3515ecc8911 205-210,215
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8-ntes.9",
+  "base_commit_sha": "ad09994b8da77b255ad88e36933b9d93ce299338",
+  "prompts": {
+    "c245f3515ecc8911": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6f44316b-dc24-49c6-aaa8-c37c5db6b27c",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "nongjiawu",
+      "messages": [],
+      "total_additions": 225,
+      "total_deletions": 8,
+      "accepted_lines": 2567,
+      "overriden_lines": 0,
+      "per_file_stats": {
+        "src/main/java/fuzzgen4ghidra/engine/EngineManager.java": {
+          "additions": 7,
+          "deletions": 1,
+          "accepted_lines": 7
+        },
+        ".tasks/task2-models.md": {
+          "accepted_lines": 151
+        },
+        "README.md": {
+          "additions": 205,
+          "deletions": 5,
+          "accepted_lines": 205
+        },
+        ".tasks/task9-java-plugin.md": {
+          "accepted_lines": 554
+        },
+        "CLAUDE.md": {
+          "accepted_lines": 77
+        },
+        "python/fuzzgen4ghidra_engine/params.py": {
+          "additions": 12,
+          "deletions": 2,
+          "accepted_lines": 12
+        },
+        ".tasks/task3-scorer.md": {
+          "accepted_lines": 155
+        },
+        ".tasks/task5-harness.md": {
+          "accepted_lines": 395
+        },
+        "python/fuzzgen4ghidra_engine/templates/libfuzzer_harness.c.j2": {
+          "additions": 1,
+          "accepted_lines": 1
+        },
+        ".tasks/task8-java-engine.md": {
+          "accepted_lines": 386
+        },
+        ".tasks/task1-protocol.md": {
+          "accepted_lines": 93
+        },
+        ".tasks/task6-engine.md": {
+          "accepted_lines": 299
+        },
+        ".tasks/task10-integration.md": {
+          "accepted_lines": 88
+        },
+        ".tasks/task4-params.md": {
+          "accepted_lines": 144
+        }
+      }
+    }
+  }
+}
