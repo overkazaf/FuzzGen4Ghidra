@@ -12,3 +12,12 @@ __pycache__/
 .tasks/
 CLAUDE.md
 .pytest_cache/
+
+# Demo build artifacts
+*.dylib
+*.so
+*.dSYM/
+demo/poc_exploit
+demo/harness_asan
+demo/so_audit/audit_demo
+demo/so_audit/audit_asan
