@@ -1,0 +1,145 @@
+demo/poc_demo.c
+  c245f3515ecc8911 20,39-114,116,124-147
+demo/so_audit/audit_demo.c
+  c245f3515ecc8911 1-365
+.gitignore
+  c245f3515ecc8911 15-23
+demo/so_audit/libnative_parser.c
+  c245f3515ecc8911 1-247
+README_CN.md
+  c245f3515ecc8911 1-541
+demo/so_audit/Makefile
+  c245f3515ecc8911 1-50
+README.md
+  c245f3515ecc8911 5,654-679,722-726
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8-ntes.9",
+  "base_commit_sha": "2750b45e787659ea292b7a667cd2f12a328965f3",
+  "prompts": {
+    "c245f3515ecc8911": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6f44316b-dc24-49c6-aaa8-c37c5db6b27c",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "nongjiawu",
+      "messages": [],
+      "total_additions": 1496,
+      "total_deletions": 526,
+      "accepted_lines": 3838,
+      "overriden_lines": 0,
+      "per_file_stats": {
+        ".tasks/task4-params.md": {
+          "accepted_lines": 144
+        },
+        "demo/so_audit/libnative_parser.c": {
+          "additions": 247,
+          "accepted_lines": 247
+        },
+        ".tasks/task9-java-plugin.md": {
+          "accepted_lines": 554
+        },
+        "demo/libdemo.dylib.dSYM/Contents/Info.plist": {
+          "additions": 20,
+          "accepted_lines": 20
+        },
+        "demo/libdemo.dylib.dSYM/Contents/Resources/Relocations/x86_64/libdemo.dylib.yml": {
+          "additions": 5,
+          "accepted_lines": 5
+        },
+        "demo/poc_exploit.dSYM/Contents/Resources/Relocations/x86_64/poc_exploit.yml": {
+          "additions": 5,
+          "accepted_lines": 5
+        },
+        "demo/libdemo_asan.dylib.dSYM/Contents/Info.plist": {
+          "additions": 20,
+          "accepted_lines": 20
+        },
+        "demo/so_audit/audit_demo.dSYM/Contents/Resources/Relocations/x86_64/audit_demo.yml": {
+          "additions": 5,
+          "accepted_lines": 5
+        },
+        ".tasks/task6-engine.md": {
+          "accepted_lines": 299
+        },
+        ".tasks/task10-integration.md": {
+          "accepted_lines": 88
+        },
+        "demo/poc_demo.c": {
+          "additions": 102,
+          "deletions": 10,
+          "accepted_lines": 102
+        },
+        ".tasks/task2-models.md": {
+          "accepted_lines": 151
+        },
+        ".tasks/task3-scorer.md": {
+          "accepted_lines": 155
+        },
+        ".tasks/task5-harness.md": {
+          "accepted_lines": 395
+        },
+        ".tasks/task1-protocol.md": {
+          "accepted_lines": 93
+        },
+        "demo/so_audit/libnative_parser.dylib.dSYM/Contents/Info.plist": {
+          "additions": 20,
+          "accepted_lines": 20
+        },
+        "demo/so_audit/Makefile": {
+          "additions": 50,
+          "accepted_lines": 50
+        },
+        "CLAUDE.md": {
+          "accepted_lines": 77
+        },
+        ".gitignore": {
+          "additions": 9,
+          "accepted_lines": 9
+        },
+        "README_CN.md": {
+          "additions": 541,
+          "accepted_lines": 541
+        },
+        "demo/so_audit/audit_demo.dSYM/Contents/Info.plist": {
+          "additions": 20,
+          "accepted_lines": 20
+        },
+        "demo/so_audit/libnative_parser.dylib.dSYM/Contents/Resources/Relocations/x86_64/libnative_parser.dylib.yml": {
+          "additions": 5,
+          "accepted_lines": 5
+        },
+        "demo/harness_asan.dSYM/Contents/Resources/Relocations/x86_64/harness_asan.yml": {
+          "additions": 5,
+          "accepted_lines": 5
+        },
+        "demo/harness_asan.dSYM/Contents/Info.plist": {
+          "additions": 20,
+          "accepted_lines": 20
+        },
+        "demo/poc_exploit.dSYM/Contents/Info.plist": {
+          "additions": 20,
+          "accepted_lines": 20
+        },
+        "demo/libdemo_asan.dylib.dSYM/Contents/Resources/Relocations/x86_64/libdemo_asan.dylib.yml": {
+          "additions": 5,
+          "accepted_lines": 5
+        },
+        "demo/so_audit/audit_demo.c": {
+          "additions": 365,
+          "accepted_lines": 365
+        },
+        ".tasks/task8-java-engine.md": {
+          "accepted_lines": 386
+        },
+        "README.md": {
+          "additions": 32,
+          "deletions": 516,
+          "accepted_lines": 32
+        }
+      }
+    }
+  }
+}
