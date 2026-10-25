@@ -1,0 +1,60 @@
+README.md
+  c245f3515ecc8911 210,212-262,577-579,581-630
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8-ntes.9",
+  "base_commit_sha": "6c346abd7c8717fe3d9941c57a2773615b907833",
+  "prompts": {
+    "c245f3515ecc8911": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6f44316b-dc24-49c6-aaa8-c37c5db6b27c",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "nongjiawu",
+      "messages": [],
+      "total_additions": 106,
+      "total_deletions": 10,
+      "accepted_lines": 2448,
+      "overriden_lines": 0,
+      "per_file_stats": {
+        ".tasks/task9-java-plugin.md": {
+          "accepted_lines": 554
+        },
+        ".tasks/task6-engine.md": {
+          "accepted_lines": 299
+        },
+        ".tasks/task5-harness.md": {
+          "accepted_lines": 395
+        },
+        ".tasks/task2-models.md": {
+          "accepted_lines": 151
+        },
+        "CLAUDE.md": {
+          "accepted_lines": 77
+        },
+        "README.md": {
+          "additions": 106,
+          "deletions": 10,
+          "accepted_lines": 106
+        },
+        ".tasks/task1-protocol.md": {
+          "accepted_lines": 93
+        },
+        ".tasks/task3-scorer.md": {
+          "accepted_lines": 155
+        },
+        ".tasks/task8-java-engine.md": {
+          "accepted_lines": 386
+        },
+        ".tasks/task4-params.md": {
+          "accepted_lines": 144
+        },
+        ".tasks/task10-integration.md": {
+          "accepted_lines": 88
+        }
+      }
+    }
+  }
+}
