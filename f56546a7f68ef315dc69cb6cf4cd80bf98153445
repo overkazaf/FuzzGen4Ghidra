@@ -1,0 +1,59 @@
+_config.yml
+  c245f3515ecc8911 1-5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8-ntes.9",
+  "base_commit_sha": "f56546a7f68ef315dc69cb6cf4cd80bf98153445",
+  "prompts": {
+    "c245f3515ecc8911": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6f44316b-dc24-49c6-aaa8-c37c5db6b27c",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "nongjiawu",
+      "messages": [],
+      "total_additions": 5,
+      "total_deletions": 0,
+      "accepted_lines": 2347,
+      "overriden_lines": 0,
+      "per_file_stats": {
+        ".tasks/task1-protocol.md": {
+          "accepted_lines": 93
+        },
+        ".tasks/task2-models.md": {
+          "accepted_lines": 151
+        },
+        ".tasks/task4-params.md": {
+          "accepted_lines": 144
+        },
+        ".tasks/task6-engine.md": {
+          "accepted_lines": 299
+        },
+        ".tasks/task3-scorer.md": {
+          "accepted_lines": 155
+        },
+        ".tasks/task5-harness.md": {
+          "accepted_lines": 395
+        },
+        ".tasks/task10-integration.md": {
+          "accepted_lines": 88
+        },
+        ".tasks/task9-java-plugin.md": {
+          "accepted_lines": 554
+        },
+        "CLAUDE.md": {
+          "accepted_lines": 77
+        },
+        ".tasks/task8-java-engine.md": {
+          "accepted_lines": 386
+        },
+        "_config.yml": {
+          "additions": 5,
+          "accepted_lines": 5
+        }
+      }
+    }
+  }
+}
