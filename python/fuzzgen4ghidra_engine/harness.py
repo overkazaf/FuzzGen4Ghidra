@@ -19,11 +19,11 @@ class _ParamRenderer:
         if p.type == ParamType.BUFFER:
             return (
                 f"{indent}/* {p.name} (buffer) */\n"
-                f"{indent}size_t {p.name}_len = (data_len > offset) ? data_len - offset : 0;\n"
+                f"{indent}size_t {p.name}_len = (_fz_len > _fz_off) ? _fz_len - _fz_off : 0;\n"
                 f"{indent}uint8_t *{p.name} = NULL;\n"
-                f"{indent}if ({p.name}_len > 0 && offset + {p.name}_len <= data_len) {{\n"
-                f"{indent}    {p.name} = (uint8_t *)(data + offset);\n"
-                f"{indent}    offset += {p.name}_len;\n"
+                f"{indent}if ({p.name}_len > 0 && _fz_off + {p.name}_len <= _fz_len) {{\n"
+                f"{indent}    {p.name} = (uint8_t *)(_fz_buf + _fz_off);\n"
+                f"{indent}    _fz_off += {p.name}_len;\n"
                 f"{indent}}}"
             )
         elif p.type == ParamType.INT:
@@ -32,22 +32,22 @@ class _ParamRenderer:
             return (
                 f"{indent}/* {p.name} */\n"
                 f"{indent}{p.c_type} {p.name} = 0;\n"
-                f"{indent}consume_bytes(data, data_len, &offset, &{p.name}, sizeof({p.name}));"
+                f"{indent}consume_bytes(_fz_buf, _fz_len, &_fz_off, &{p.name}, sizeof({p.name}));"
             )
         elif p.type == ParamType.FLOAT:
             return (
                 f"{indent}/* {p.name} */\n"
                 f"{indent}{p.c_type} {p.name} = 0;\n"
-                f"{indent}consume_bytes(data, data_len, &offset, &{p.name}, sizeof({p.name}));"
+                f"{indent}consume_bytes(_fz_buf, _fz_len, &_fz_off, &{p.name}, sizeof({p.name}));"
             )
         elif p.type == ParamType.STRUCT_PTR:
             return (
                 f"{indent}/* {p.name} (struct pointer - treat as raw bytes for MVP) */\n"
                 f"{indent}uint8_t {p.name}_buf[256] = {{0}};\n"
-                f"{indent}size_t {p.name}_avail = (data_len > offset) ? data_len - offset : 0;\n"
+                f"{indent}size_t {p.name}_avail = (_fz_len > _fz_off) ? _fz_len - _fz_off : 0;\n"
                 f"{indent}if ({p.name}_avail > 256) {p.name}_avail = 256;\n"
-                f"{indent}if ({p.name}_avail > 0) memcpy({p.name}_buf, data + offset, {p.name}_avail);\n"
-                f"{indent}offset += {p.name}_avail;\n"
+                f"{indent}if ({p.name}_avail > 0) memcpy({p.name}_buf, _fz_buf + _fz_off, {p.name}_avail);\n"
+                f"{indent}_fz_off += {p.name}_avail;\n"
                 f"{indent}void *{p.name} = {p.name}_buf;"
             )
         elif p.type == ParamType.FUNC_PTR:
@@ -56,7 +56,7 @@ class _ParamRenderer:
             return (
                 f"{indent}/* {p.name} (unknown type: {p.c_type}) */\n"
                 f"{indent}uint8_t {p.name}_raw[{p.size}] = {{0}};\n"
-                f"{indent}consume_bytes(data, data_len, &offset, {p.name}_raw, {p.size});\n"
+                f"{indent}consume_bytes(_fz_buf, _fz_len, &_fz_off, {p.name}_raw, {p.size});\n"
                 f"{indent}void *{p.name} = {p.name}_raw;"
             )
 

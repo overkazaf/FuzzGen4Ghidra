@@ -7,6 +7,14 @@ GHIDRA_TO_C_TYPE = {
     "undefined2": "uint16_t",
     "undefined4": "uint32_t",
     "undefined8": "uint64_t",
+    "uchar": "unsigned char",
+    "ushort": "unsigned short",
+    "uint": "unsigned int",
+    "ulong": "unsigned long",
+    "byte": "uint8_t",
+    "word": "uint16_t",
+    "dword": "uint32_t",
+    "qword": "uint64_t",
 }
 
 INT_TYPES = frozenset({
@@ -61,7 +69,9 @@ def recover_params_from_ghidra(ghidra_sig: dict) -> list[ParamInfo]:
     results: list[ParamInfo] = []
     for i, p in enumerate(params_raw):
         raw_type = p.get("type", "int")
-        c_type = GHIDRA_TO_C_TYPE.get(raw_type, raw_type)
+        base = raw_type.rstrip(" *")
+        ptr_suffix = raw_type[len(base):]
+        c_type = GHIDRA_TO_C_TYPE.get(base, base) + ptr_suffix
         ptype = _classify_type(raw_type)
         length_param = None
         if ptype == ParamType.BUFFER:

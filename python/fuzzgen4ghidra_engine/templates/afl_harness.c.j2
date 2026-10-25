@@ -32,18 +32,18 @@ int main(int argc, char **argv) {
     fseek(f, 0, SEEK_SET);
     if (file_len <= 0) { fclose(f); return 1; }
 
-    size_t data_len = (size_t)file_len;
-    uint8_t *data = (uint8_t *)malloc(data_len);
-    if (!data) { fclose(f); return 1; }
-    fread(data, 1, data_len, f);
+    size_t _fz_len = (size_t)file_len;
+    uint8_t *_fz_buf = (uint8_t *)malloc(_fz_len);
+    if (!_fz_buf) { fclose(f); return 1; }
+    fread(_fz_buf, 1, _fz_len, f);
     fclose(f);
 
     void *lib = dlopen("./{{ target_binary }}", RTLD_LAZY);
-    if (!lib) { free(data); return 1; }
+    if (!lib) { free(_fz_buf); return 1; }
     target_fn_t target = (target_fn_t)dlsym(lib, "{{ func_name }}");
-    if (!target) { dlclose(lib); free(data); return 1; }
+    if (!target) { dlclose(lib); free(_fz_buf); return 1; }
 
-    size_t offset = 0;
+    size_t _fz_off = 0;
 {% for p in params %}
 {{ p.deserialize_code }}
 {% endfor %}
@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
 {% for p in params %}
 {{ p.cleanup_code }}
 {% endfor %}
-    free(data);
+    free(_fz_buf);
     dlclose(lib);
     return 0;
 }

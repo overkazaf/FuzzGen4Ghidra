@@ -28,11 +28,12 @@ static void init(void) {
     if (g_lib) g_target = (target_fn_t)dlsym(g_lib, "{{ func_name }}");
 }
 
-int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+int LLVMFuzzerTestOneInput(const uint8_t *_fz_input, size_t _fz_size) {
     if (!g_target) return 0;
 
-    size_t data_len = size;
-    size_t offset = 0;
+    const uint8_t *_fz_buf = _fz_input;
+    size_t _fz_len = _fz_size;
+    size_t _fz_off = 0;
 {% for p in params %}
 {{ p.deserialize_code }}
 {% endfor %}
