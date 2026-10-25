@@ -1,0 +1,78 @@
+demo/Makefile
+  c245f3515ecc8911 1-44
+demo/poc_demo.c
+  c245f3515ecc8911 1-227
+README.md
+  c245f3515ecc8911 23-53,56-58,62-74,79-114,401,405-414,416,418,422-444,447,450-503,506-515,518-629,632-655,695-699,724,726,728-806,808-815,824,828-835,1034-1126,1144-1204
+demo/libdemo.c
+  c245f3515ecc8911 1-69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8-ntes.9",
+  "base_commit_sha": "57b412b6fea65d5c77929ff922b1f038c0d58fa8",
+  "prompts": {
+    "c245f3515ecc8911": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6f44316b-dc24-49c6-aaa8-c37c5db6b27c",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "nongjiawu",
+      "messages": [],
+      "total_additions": 926,
+      "total_deletions": 33,
+      "accepted_lines": 3268,
+      "overriden_lines": 0,
+      "per_file_stats": {
+        ".tasks/task1-protocol.md": {
+          "accepted_lines": 93
+        },
+        ".tasks/task6-engine.md": {
+          "accepted_lines": 299
+        },
+        ".tasks/task3-scorer.md": {
+          "accepted_lines": 155
+        },
+        ".tasks/task10-integration.md": {
+          "accepted_lines": 88
+        },
+        "demo/Makefile": {
+          "additions": 44,
+          "accepted_lines": 44
+        },
+        "demo/poc_demo.c": {
+          "additions": 227,
+          "accepted_lines": 227
+        },
+        "README.md": {
+          "additions": 586,
+          "deletions": 33,
+          "accepted_lines": 586
+        },
+        ".tasks/task8-java-engine.md": {
+          "accepted_lines": 386
+        },
+        ".tasks/task5-harness.md": {
+          "accepted_lines": 395
+        },
+        "CLAUDE.md": {
+          "accepted_lines": 77
+        },
+        ".tasks/task4-params.md": {
+          "accepted_lines": 144
+        },
+        "demo/libdemo.c": {
+          "additions": 69,
+          "accepted_lines": 69
+        },
+        ".tasks/task9-java-plugin.md": {
+          "accepted_lines": 554
+        },
+        ".tasks/task2-models.md": {
+          "accepted_lines": 151
+        }
+      }
+    }
+  }
+}
