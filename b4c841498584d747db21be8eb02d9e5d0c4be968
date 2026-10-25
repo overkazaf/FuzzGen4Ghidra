@@ -1,0 +1,81 @@
+python/fuzzgen4ghidra_engine/templates/afl_harness.c.j2
+  c245f3515ecc8911 35-38,42,44,46,56
+python/fuzzgen4ghidra_engine/params.py
+  c245f3515ecc8911 10-17,72-74
+python/fuzzgen4ghidra_engine/harness.py
+  c245f3515ecc8911 22,24-26,35,41,47,49-50,59
+python/fuzzgen4ghidra_engine/templates/libfuzzer_harness.c.j2
+  c245f3515ecc8911 31,34-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8-ntes.9",
+  "base_commit_sha": "b4c841498584d747db21be8eb02d9e5d0c4be968",
+  "prompts": {
+    "c245f3515ecc8911": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6f44316b-dc24-49c6-aaa8-c37c5db6b27c",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "nongjiawu",
+      "messages": [],
+      "total_additions": 35,
+      "total_deletions": 24,
+      "accepted_lines": 2375,
+      "overriden_lines": 0,
+      "per_file_stats": {
+        ".tasks/task10-integration.md": {
+          "accepted_lines": 88
+        },
+        ".tasks/task3-scorer.md": {
+          "accepted_lines": 155
+        },
+        "python/fuzzgen4ghidra_engine/params.py": {
+          "additions": 11,
+          "deletions": 1,
+          "accepted_lines": 11
+        },
+        "python/fuzzgen4ghidra_engine/harness.py": {
+          "additions": 10,
+          "deletions": 10,
+          "accepted_lines": 10
+        },
+        "python/fuzzgen4ghidra_engine/templates/afl_harness.c.j2": {
+          "additions": 8,
+          "deletions": 8,
+          "accepted_lines": 8
+        },
+        ".tasks/task8-java-engine.md": {
+          "accepted_lines": 386
+        },
+        ".tasks/task9-java-plugin.md": {
+          "accepted_lines": 554
+        },
+        ".tasks/task5-harness.md": {
+          "accepted_lines": 395
+        },
+        ".tasks/task4-params.md": {
+          "accepted_lines": 144
+        },
+        "CLAUDE.md": {
+          "accepted_lines": 77
+        },
+        "python/fuzzgen4ghidra_engine/templates/libfuzzer_harness.c.j2": {
+          "additions": 6,
+          "deletions": 5,
+          "accepted_lines": 4
+        },
+        ".tasks/task2-models.md": {
+          "accepted_lines": 151
+        },
+        ".tasks/task1-protocol.md": {
+          "accepted_lines": 93
+        },
+        ".tasks/task6-engine.md": {
+          "accepted_lines": 299
+        }
+      }
+    }
+  }
+}
