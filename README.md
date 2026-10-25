@@ -207,14 +207,62 @@ make           # Compiles with clang -fsanitize=fuzzer,address
 make fuzz      # Starts the libFuzzer binary
 ```
 
-#### Troubleshooting
+#### FAQ & Troubleshooting
 
-| Problem | Solution |
+**Q: "Failed to load binary: No module named 'angr'"**
+
+The plugin found a Python interpreter but it doesn't have angr installed. Two solutions:
+
+1. **Set `FUZZGEN_PYTHON` env var** (recommended): point it to the correct venv Python before launching Ghidra:
+   ```bash
+   export FUZZGEN_PYTHON="/path/to/your/.venv/bin/python3"
+   /path/to/ghidra/ghidraRun
+   ```
+2. **Start the engine manually** in a terminal — the plugin will connect to it automatically:
+   ```bash
+   cd FuzzGen4Ghidra
+   PYTHONPATH=python /path/to/.venv/bin/python3 -m fuzzgen4ghidra_engine -v
+   # Then use the plugin in Ghidra as normal
+   ```
+
+**Q: "Binary not loaded — call init first"**
+
+You triggered Scan from the **Project Window** instead of **CodeBrowser**. Double-click the binary to open it in CodeBrowser first, then use the plugin from there.
+
+**Q: "Address already in use" when starting the engine manually**
+
+A previous engine process is still running on port 13371. Kill it first:
+```bash
+lsof -ti :13371 | xargs kill
+```
+
+**Q: libFuzzer harness fails to link: `libclang_rt.fuzzer_osx.a not found`**
+
+Apple's Xcode Clang doesn't include the libFuzzer runtime. Install LLVM via Homebrew:
+```bash
+brew install llvm
+/opt/homebrew/opt/llvm/bin/clang -fsanitize=fuzzer,address -o harness harness.c -ldl
+```
+
+**Q: AFL harness fails: `afl-gcc: No such file or directory`**
+
+AFL++ is not installed. Install it:
+```bash
+brew install aflplusplus
+```
+Or switch to libFuzzer format in the preview dialog (no AFL++ needed, just LLVM clang).
+
+**Q: Harness compiles but crashes immediately with `dlopen` error**
+
+The target library must be in the same directory as the harness (or in a path `dlopen` can find). Copy it:
+```bash
+cp /path/to/target.so ./   # same directory as the harness
+```
+
+| Other Problems | Solution |
 |---------|----------|
-| "Engine not started" error | Check that `.venv/bin/python3` exists and has `angr` and `jinja2` installed |
 | Engine takes a long time | angr's CFG analysis is CPU-intensive; large binaries take longer |
 | No functions found in scan | The binary may be stripped or have no exported functions; try a shared library |
-| Harness won't compile | Make sure `afl-gcc` (AFL++) or `clang` (libFuzzer) is installed and in PATH |
 | "Generate Fuzz Harness" is greyed out | Make sure your cursor is positioned inside a function in the Listing/Decompiler view |
 
 ### Demo: Generating a harness
@@ -526,14 +574,62 @@ make           # 用 clang -fsanitize=fuzzer,address 编译
 make fuzz      # 启动 libFuzzer
 ```
 
-#### 常见问题
+#### 常见问题（FAQ）
 
-| 问题 | 解决方案 |
-|------|----------|
-| "Engine not started" 错误 | 检查 `.venv/bin/python3` 是否存在，且已安装 `angr` 和 `jinja2` |
+**Q: "Failed to load binary: No module named 'angr'"**
+
+插件找到了 Python 解释器，但该 Python 没有安装 angr。两种解决方案：
+
+1. **设置 `FUZZGEN_PYTHON` 环境变量**（推荐）：在启动 Ghidra 前指定正确的 venv Python：
+   ```bash
+   export FUZZGEN_PYTHON="/path/to/.venv/bin/python3"
+   /path/to/ghidra/ghidraRun
+   ```
+2. **手动启动引擎** — 插件会自动连接到已运行的引擎：
+   ```bash
+   cd FuzzGen4Ghidra
+   PYTHONPATH=python /path/to/.venv/bin/python3 -m fuzzgen4ghidra_engine -v
+   # 然后在 Ghidra 中正常使用插件
+   ```
+
+**Q: "Binary not loaded — call init first"**
+
+你在**项目窗口**而不是 **CodeBrowser** 中触发了扫描。先双击二进制文件在 CodeBrowser 中打开，然后再使用插件。
+
+**Q: 手动启动引擎时报 "Address already in use"**
+
+端口 13371 被旧进程占用，先杀掉：
+```bash
+lsof -ti :13371 | xargs kill
+```
+
+**Q: libFuzzer harness 链接失败：`libclang_rt.fuzzer_osx.a not found`**
+
+macOS 自带的 Apple Clang 不包含 libFuzzer 运行时。需要安装 Homebrew LLVM：
+```bash
+brew install llvm
+/opt/homebrew/opt/llvm/bin/clang -fsanitize=fuzzer,address -o harness harness.c -ldl
+```
+
+**Q: AFL harness 编译失败：`afl-gcc: No such file or directory`**
+
+未安装 AFL++。安装方法：
+```bash
+brew install aflplusplus
+```
+或在预览对话框中切换为 libFuzzer 格式（只需 LLVM clang，无需 AFL++）。
+
+**Q: Harness 编译成功但运行时 `dlopen` 报错**
+
+目标库必须在 harness 同目录下（或在 `dlopen` 可查找的路径中）：
+```bash
+cp /path/to/target.so ./   # 复制到 harness 同目录
+```
+
+| 其他问题 | 解决方案 |
+|---------|----------|
 | 引擎启动很慢 | angr 的 CFG 分析是 CPU 密集型的，大型二进制文件需要更多时间 |
 | 扫描未发现函数 | 二进制可能被 strip 了或没有导出函数，尝试使用共享库 |
-| Harness 编译失败 | 确认已安装 `afl-gcc`（AFL++）或 `clang`（libFuzzer）并在 PATH 中 |
 | "Generate Fuzz Harness" 灰色不可点 | 确保光标在 Listing/Decompiler 视图中的某个函数内部 |
 
 ### 演示：从生成到 fuzzing
