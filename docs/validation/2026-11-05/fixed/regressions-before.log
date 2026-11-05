@@ -1,0 +1,959 @@
+FFFFFFFFF.FFFF..FFF                                                      [100%]
+=================================== FAILURES ===================================
+_ test_generated_call[signature0-assert(len == 28 && flags == 0x04030201 && buf[0] == 5);-afl] _
+
+tmp_path = PosixPath('/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature00')
+cc = '/usr/bin/clang', fmt = 'afl'
+signature = {'params': [{'name': 'buf', 'type': 'byte *', 'size': 8}, {'name': 'len', 'type': 'int', 'size': 4}, {'name': 'flags', 'type': 'int', 'size': 4}]}
+body = 'assert(len == 28 && flags == 0x04030201 && buf[0] == 5);'
+
+    @pytest.mark.parametrize('fmt', ['afl', 'libfuzzer'])
+    @pytest.mark.parametrize('signature,body', [
+        (sig(('buf', 'byte *'), ('len', 'int'), ('flags', 'int')),
+         'assert(len == 28 && flags == 0x04030201 && buf[0] == 5);'),
+        (sig(('buf', 'const unsigned char *'), ('len', 'int')),
+         'assert(len == 32 && buf[0] == 1);'),
+        (sig(('buf', 'byte *'), ('option', 'int'), ('len', 'int')),
+         'assert(len == 28 && option == 0x04030201);'),
+        (sig(('a', 'byte *'), ('a_len', 'int'), ('b', 'byte *'), ('b_len', 'int')),
+         'assert(a_len == 16 && b_len == 16 && a[0] == 1 && b[0] == 17);'),
+        (sig(('target', 'int')), 'assert(target == 0x04030201);'),
+        (sig(('cb', 'code *')), 'assert(cb == 0);'),
+        (sig(('ctx', 'parser_ctx *')), 'assert(ctx != 0);'),
+        (sig(('flag', 'bool')), '(void)flag;'),
+    ])
+    def test_generated_call(tmp_path, cc, fmt, signature, body):
+        lib = 'libprobe.dylib' if platform.system() == 'Darwin' else 'libprobe.so'
+        engine = FuzzGenEngine()
+        engine.generate_harness(0x1000, 'probe', signature, lib, fmt,
+                                output_dir=str(tmp_path), call_mode='dlsym')
+        # A separate oracle declaration avoids relying on generator type recovery.
+        mapping = {'byte *': 'unsigned char *', 'code *': 'void (*cb)(void)'}
+        declarations = []
+        for p in signature['params']:
+            declarations.append(mapping['code *'] if p['type'] == 'code *'
+                                else mapping.get(p['type'], p['type']) + ' ' + p['name'])
+        (tmp_path/'probe.c').write_text(
+            '#include <assert.h>\n#include <stdbool.h>\ntypedef struct parser_ctx parser_ctx;\n'
+            + 'int probe(' + ', '.join(declarations) + '){' + body + 'return 0;}')
+        shared = ['-dynamiclib'] if platform.system() == 'Darwin' else ['-shared', '-fPIC']
+        r = run([cc, *shared, str(tmp_path/'probe.c'), '-o', str(tmp_path/lib)])
+        assert r.returncode == 0, r.stderr
+        cmd = [cc, '-std=c11', '-D_GNU_SOURCE', str(tmp_path/'harness_probe.c')]
+        if fmt == 'libfuzzer':
+            (tmp_path/'driver.c').write_text(
+                '#include <stdint.h>\n#include <stddef.h>\n'
+                'int LLVMFuzzerTestOneInput(const uint8_t*,size_t);\n'
+                'int main(void){uint8_t input[32];for(int i=0;i<32;i++)input[i]=i+1;'
+                'return LLVMFuzzerTestOneInput(input,32);}')
+            cmd += [str(tmp_path/'driver.c')]
+        cmd += ['-o', str(tmp_path/'harness'), '-ldl']
+        r = run(cmd)
+        assert r.returncode == 0, r.stderr
+        (tmp_path/'input').write_bytes(bytes(range(1,33)))
+        r = run([str(tmp_path/'harness'), 'input'], cwd=tmp_path)
+>       assert r.returncode == 0, r.stderr
+E       AssertionError: [fuzzgen] loaded ./libprobe.dylib (handle 0x471d7310)
+E         [fuzzgen] resolved probe via dlsym -> 0x10007c490
+E         Assertion failed: (len == 28 && flags == 0x04030201 && buf[0] == 5), function probe, file probe.c, line 4.
+E
+E       assert -6 == 0
+E        +  where -6 = CompletedProcess(args=['/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_gen...007c490\nAssertion failed: (len == 28 && flags == 0x04030201 && buf[0] == 5), function probe, file probe.c, line 4.\n').returncode
+
+test/test_regressions.py:77: AssertionError
+_ test_generated_call[signature0-assert(len == 28 && flags == 0x04030201 && buf[0] == 5);-libfuzzer] _
+
+tmp_path = PosixPath('/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature01')
+cc = '/usr/bin/clang', fmt = 'libfuzzer'
+signature = {'params': [{'name': 'buf', 'type': 'byte *', 'size': 8}, {'name': 'len', 'type': 'int', 'size': 4}, {'name': 'flags', 'type': 'int', 'size': 4}]}
+body = 'assert(len == 28 && flags == 0x04030201 && buf[0] == 5);'
+
+    @pytest.mark.parametrize('fmt', ['afl', 'libfuzzer'])
+    @pytest.mark.parametrize('signature,body', [
+        (sig(('buf', 'byte *'), ('len', 'int'), ('flags', 'int')),
+         'assert(len == 28 && flags == 0x04030201 && buf[0] == 5);'),
+        (sig(('buf', 'const unsigned char *'), ('len', 'int')),
+         'assert(len == 32 && buf[0] == 1);'),
+        (sig(('buf', 'byte *'), ('option', 'int'), ('len', 'int')),
+         'assert(len == 28 && option == 0x04030201);'),
+        (sig(('a', 'byte *'), ('a_len', 'int'), ('b', 'byte *'), ('b_len', 'int')),
+         'assert(a_len == 16 && b_len == 16 && a[0] == 1 && b[0] == 17);'),
+        (sig(('target', 'int')), 'assert(target == 0x04030201);'),
+        (sig(('cb', 'code *')), 'assert(cb == 0);'),
+        (sig(('ctx', 'parser_ctx *')), 'assert(ctx != 0);'),
+        (sig(('flag', 'bool')), '(void)flag;'),
+    ])
+    def test_generated_call(tmp_path, cc, fmt, signature, body):
+        lib = 'libprobe.dylib' if platform.system() == 'Darwin' else 'libprobe.so'
+        engine = FuzzGenEngine()
+        engine.generate_harness(0x1000, 'probe', signature, lib, fmt,
+                                output_dir=str(tmp_path), call_mode='dlsym')
+        # A separate oracle declaration avoids relying on generator type recovery.
+        mapping = {'byte *': 'unsigned char *', 'code *': 'void (*cb)(void)'}
+        declarations = []
+        for p in signature['params']:
+            declarations.append(mapping['code *'] if p['type'] == 'code *'
+                                else mapping.get(p['type'], p['type']) + ' ' + p['name'])
+        (tmp_path/'probe.c').write_text(
+            '#include <assert.h>\n#include <stdbool.h>\ntypedef struct parser_ctx parser_ctx;\n'
+            + 'int probe(' + ', '.join(declarations) + '){' + body + 'return 0;}')
+        shared = ['-dynamiclib'] if platform.system() == 'Darwin' else ['-shared', '-fPIC']
+        r = run([cc, *shared, str(tmp_path/'probe.c'), '-o', str(tmp_path/lib)])
+        assert r.returncode == 0, r.stderr
+        cmd = [cc, '-std=c11', '-D_GNU_SOURCE', str(tmp_path/'harness_probe.c')]
+        if fmt == 'libfuzzer':
+            (tmp_path/'driver.c').write_text(
+                '#include <stdint.h>\n#include <stddef.h>\n'
+                'int LLVMFuzzerTestOneInput(const uint8_t*,size_t);\n'
+                'int main(void){uint8_t input[32];for(int i=0;i<32;i++)input[i]=i+1;'
+                'return LLVMFuzzerTestOneInput(input,32);}')
+            cmd += [str(tmp_path/'driver.c')]
+        cmd += ['-o', str(tmp_path/'harness'), '-ldl']
+        r = run(cmd)
+        assert r.returncode == 0, r.stderr
+        (tmp_path/'input').write_bytes(bytes(range(1,33)))
+        r = run([str(tmp_path/'harness'), 'input'], cwd=tmp_path)
+>       assert r.returncode == 0, r.stderr
+E       AssertionError: [fuzzgen] loaded ./libprobe.dylib (handle 0x471d7310)
+E         [fuzzgen] resolved probe via dlsym -> 0x1072c4490
+E         Assertion failed: (len == 28 && flags == 0x04030201 && buf[0] == 5), function probe, file probe.c, line 4.
+E
+E       assert -6 == 0
+E        +  where -6 = CompletedProcess(args=['/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_gen...72c4490\nAssertion failed: (len == 28 && flags == 0x04030201 && buf[0] == 5), function probe, file probe.c, line 4.\n').returncode
+
+test/test_regressions.py:77: AssertionError
+____ test_generated_call[signature1-assert(len == 32 && buf[0] == 1);-afl] _____
+
+tmp_path = PosixPath('/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature10')
+cc = '/usr/bin/clang', fmt = 'afl'
+signature = {'params': [{'name': 'buf', 'type': 'const unsigned char *', 'size': 8}, {'name': 'len', 'type': 'int', 'size': 4}]}
+body = 'assert(len == 32 && buf[0] == 1);'
+
+    @pytest.mark.parametrize('fmt', ['afl', 'libfuzzer'])
+    @pytest.mark.parametrize('signature,body', [
+        (sig(('buf', 'byte *'), ('len', 'int'), ('flags', 'int')),
+         'assert(len == 28 && flags == 0x04030201 && buf[0] == 5);'),
+        (sig(('buf', 'const unsigned char *'), ('len', 'int')),
+         'assert(len == 32 && buf[0] == 1);'),
+        (sig(('buf', 'byte *'), ('option', 'int'), ('len', 'int')),
+         'assert(len == 28 && option == 0x04030201);'),
+        (sig(('a', 'byte *'), ('a_len', 'int'), ('b', 'byte *'), ('b_len', 'int')),
+         'assert(a_len == 16 && b_len == 16 && a[0] == 1 && b[0] == 17);'),
+        (sig(('target', 'int')), 'assert(target == 0x04030201);'),
+        (sig(('cb', 'code *')), 'assert(cb == 0);'),
+        (sig(('ctx', 'parser_ctx *')), 'assert(ctx != 0);'),
+        (sig(('flag', 'bool')), '(void)flag;'),
+    ])
+    def test_generated_call(tmp_path, cc, fmt, signature, body):
+        lib = 'libprobe.dylib' if platform.system() == 'Darwin' else 'libprobe.so'
+        engine = FuzzGenEngine()
+        engine.generate_harness(0x1000, 'probe', signature, lib, fmt,
+                                output_dir=str(tmp_path), call_mode='dlsym')
+        # A separate oracle declaration avoids relying on generator type recovery.
+        mapping = {'byte *': 'unsigned char *', 'code *': 'void (*cb)(void)'}
+        declarations = []
+        for p in signature['params']:
+            declarations.append(mapping['code *'] if p['type'] == 'code *'
+                                else mapping.get(p['type'], p['type']) + ' ' + p['name'])
+        (tmp_path/'probe.c').write_text(
+            '#include <assert.h>\n#include <stdbool.h>\ntypedef struct parser_ctx parser_ctx;\n'
+            + 'int probe(' + ', '.join(declarations) + '){' + body + 'return 0;}')
+        shared = ['-dynamiclib'] if platform.system() == 'Darwin' else ['-shared', '-fPIC']
+        r = run([cc, *shared, str(tmp_path/'probe.c'), '-o', str(tmp_path/lib)])
+        assert r.returncode == 0, r.stderr
+        cmd = [cc, '-std=c11', '-D_GNU_SOURCE', str(tmp_path/'harness_probe.c')]
+        if fmt == 'libfuzzer':
+            (tmp_path/'driver.c').write_text(
+                '#include <stdint.h>\n#include <stddef.h>\n'
+                'int LLVMFuzzerTestOneInput(const uint8_t*,size_t);\n'
+                'int main(void){uint8_t input[32];for(int i=0;i<32;i++)input[i]=i+1;'
+                'return LLVMFuzzerTestOneInput(input,32);}')
+            cmd += [str(tmp_path/'driver.c')]
+        cmd += ['-o', str(tmp_path/'harness'), '-ldl']
+        r = run(cmd)
+        assert r.returncode == 0, r.stderr
+        (tmp_path/'input').write_bytes(bytes(range(1,33)))
+        r = run([str(tmp_path/'harness'), 'input'], cwd=tmp_path)
+>       assert r.returncode == 0, r.stderr
+E       AssertionError: [fuzzgen] loaded ./libprobe.dylib (handle 0x471d7310)
+E         [fuzzgen] resolved probe via dlsym -> 0x10ec49490
+E         Assertion failed: (len == 32 && buf[0] == 1), function probe, file probe.c, line 4.
+E
+E       assert -6 == 0
+E        +  where -6 = CompletedProcess(args=['/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_gen...probe via dlsym -> 0x10ec49490\nAssertion failed: (len == 32 && buf[0] == 1), function probe, file probe.c, line 4.\n').returncode
+
+test/test_regressions.py:77: AssertionError
+_ test_generated_call[signature1-assert(len == 32 && buf[0] == 1);-libfuzzer] __
+
+tmp_path = PosixPath('/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature11')
+cc = '/usr/bin/clang', fmt = 'libfuzzer'
+signature = {'params': [{'name': 'buf', 'type': 'const unsigned char *', 'size': 8}, {'name': 'len', 'type': 'int', 'size': 4}]}
+body = 'assert(len == 32 && buf[0] == 1);'
+
+    @pytest.mark.parametrize('fmt', ['afl', 'libfuzzer'])
+    @pytest.mark.parametrize('signature,body', [
+        (sig(('buf', 'byte *'), ('len', 'int'), ('flags', 'int')),
+         'assert(len == 28 && flags == 0x04030201 && buf[0] == 5);'),
+        (sig(('buf', 'const unsigned char *'), ('len', 'int')),
+         'assert(len == 32 && buf[0] == 1);'),
+        (sig(('buf', 'byte *'), ('option', 'int'), ('len', 'int')),
+         'assert(len == 28 && option == 0x04030201);'),
+        (sig(('a', 'byte *'), ('a_len', 'int'), ('b', 'byte *'), ('b_len', 'int')),
+         'assert(a_len == 16 && b_len == 16 && a[0] == 1 && b[0] == 17);'),
+        (sig(('target', 'int')), 'assert(target == 0x04030201);'),
+        (sig(('cb', 'code *')), 'assert(cb == 0);'),
+        (sig(('ctx', 'parser_ctx *')), 'assert(ctx != 0);'),
+        (sig(('flag', 'bool')), '(void)flag;'),
+    ])
+    def test_generated_call(tmp_path, cc, fmt, signature, body):
+        lib = 'libprobe.dylib' if platform.system() == 'Darwin' else 'libprobe.so'
+        engine = FuzzGenEngine()
+        engine.generate_harness(0x1000, 'probe', signature, lib, fmt,
+                                output_dir=str(tmp_path), call_mode='dlsym')
+        # A separate oracle declaration avoids relying on generator type recovery.
+        mapping = {'byte *': 'unsigned char *', 'code *': 'void (*cb)(void)'}
+        declarations = []
+        for p in signature['params']:
+            declarations.append(mapping['code *'] if p['type'] == 'code *'
+                                else mapping.get(p['type'], p['type']) + ' ' + p['name'])
+        (tmp_path/'probe.c').write_text(
+            '#include <assert.h>\n#include <stdbool.h>\ntypedef struct parser_ctx parser_ctx;\n'
+            + 'int probe(' + ', '.join(declarations) + '){' + body + 'return 0;}')
+        shared = ['-dynamiclib'] if platform.system() == 'Darwin' else ['-shared', '-fPIC']
+        r = run([cc, *shared, str(tmp_path/'probe.c'), '-o', str(tmp_path/lib)])
+        assert r.returncode == 0, r.stderr
+        cmd = [cc, '-std=c11', '-D_GNU_SOURCE', str(tmp_path/'harness_probe.c')]
+        if fmt == 'libfuzzer':
+            (tmp_path/'driver.c').write_text(
+                '#include <stdint.h>\n#include <stddef.h>\n'
+                'int LLVMFuzzerTestOneInput(const uint8_t*,size_t);\n'
+                'int main(void){uint8_t input[32];for(int i=0;i<32;i++)input[i]=i+1;'
+                'return LLVMFuzzerTestOneInput(input,32);}')
+            cmd += [str(tmp_path/'driver.c')]
+        cmd += ['-o', str(tmp_path/'harness'), '-ldl']
+        r = run(cmd)
+        assert r.returncode == 0, r.stderr
+        (tmp_path/'input').write_bytes(bytes(range(1,33)))
+        r = run([str(tmp_path/'harness'), 'input'], cwd=tmp_path)
+>       assert r.returncode == 0, r.stderr
+E       AssertionError: [fuzzgen] loaded ./libprobe.dylib (handle 0x471d7310)
+E         [fuzzgen] resolved probe via dlsym -> 0x1079b2490
+E         Assertion failed: (len == 32 && buf[0] == 1), function probe, file probe.c, line 4.
+E
+E       assert -6 == 0
+E        +  where -6 = CompletedProcess(args=['/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_gen...probe via dlsym -> 0x1079b2490\nAssertion failed: (len == 32 && buf[0] == 1), function probe, file probe.c, line 4.\n').returncode
+
+test/test_regressions.py:77: AssertionError
+_ test_generated_call[signature2-assert(len == 28 && option == 0x04030201);-afl] _
+
+tmp_path = PosixPath('/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature20')
+cc = '/usr/bin/clang', fmt = 'afl'
+signature = {'params': [{'name': 'buf', 'type': 'byte *', 'size': 8}, {'name': 'option', 'type': 'int', 'size': 4}, {'name': 'len', 'type': 'int', 'size': 4}]}
+body = 'assert(len == 28 && option == 0x04030201);'
+
+    @pytest.mark.parametrize('fmt', ['afl', 'libfuzzer'])
+    @pytest.mark.parametrize('signature,body', [
+        (sig(('buf', 'byte *'), ('len', 'int'), ('flags', 'int')),
+         'assert(len == 28 && flags == 0x04030201 && buf[0] == 5);'),
+        (sig(('buf', 'const unsigned char *'), ('len', 'int')),
+         'assert(len == 32 && buf[0] == 1);'),
+        (sig(('buf', 'byte *'), ('option', 'int'), ('len', 'int')),
+         'assert(len == 28 && option == 0x04030201);'),
+        (sig(('a', 'byte *'), ('a_len', 'int'), ('b', 'byte *'), ('b_len', 'int')),
+         'assert(a_len == 16 && b_len == 16 && a[0] == 1 && b[0] == 17);'),
+        (sig(('target', 'int')), 'assert(target == 0x04030201);'),
+        (sig(('cb', 'code *')), 'assert(cb == 0);'),
+        (sig(('ctx', 'parser_ctx *')), 'assert(ctx != 0);'),
+        (sig(('flag', 'bool')), '(void)flag;'),
+    ])
+    def test_generated_call(tmp_path, cc, fmt, signature, body):
+        lib = 'libprobe.dylib' if platform.system() == 'Darwin' else 'libprobe.so'
+        engine = FuzzGenEngine()
+        engine.generate_harness(0x1000, 'probe', signature, lib, fmt,
+                                output_dir=str(tmp_path), call_mode='dlsym')
+        # A separate oracle declaration avoids relying on generator type recovery.
+        mapping = {'byte *': 'unsigned char *', 'code *': 'void (*cb)(void)'}
+        declarations = []
+        for p in signature['params']:
+            declarations.append(mapping['code *'] if p['type'] == 'code *'
+                                else mapping.get(p['type'], p['type']) + ' ' + p['name'])
+        (tmp_path/'probe.c').write_text(
+            '#include <assert.h>\n#include <stdbool.h>\ntypedef struct parser_ctx parser_ctx;\n'
+            + 'int probe(' + ', '.join(declarations) + '){' + body + 'return 0;}')
+        shared = ['-dynamiclib'] if platform.system() == 'Darwin' else ['-shared', '-fPIC']
+        r = run([cc, *shared, str(tmp_path/'probe.c'), '-o', str(tmp_path/lib)])
+        assert r.returncode == 0, r.stderr
+        cmd = [cc, '-std=c11', '-D_GNU_SOURCE', str(tmp_path/'harness_probe.c')]
+        if fmt == 'libfuzzer':
+            (tmp_path/'driver.c').write_text(
+                '#include <stdint.h>\n#include <stddef.h>\n'
+                'int LLVMFuzzerTestOneInput(const uint8_t*,size_t);\n'
+                'int main(void){uint8_t input[32];for(int i=0;i<32;i++)input[i]=i+1;'
+                'return LLVMFuzzerTestOneInput(input,32);}')
+            cmd += [str(tmp_path/'driver.c')]
+        cmd += ['-o', str(tmp_path/'harness'), '-ldl']
+        r = run(cmd)
+        assert r.returncode == 0, r.stderr
+        (tmp_path/'input').write_bytes(bytes(range(1,33)))
+        r = run([str(tmp_path/'harness'), 'input'], cwd=tmp_path)
+>       assert r.returncode == 0, r.stderr
+E       AssertionError: [fuzzgen] loaded ./libprobe.dylib (handle 0x471d7310)
+E         [fuzzgen] resolved probe via dlsym -> 0x105de8490
+E         Assertion failed: (len == 28 && option == 0x04030201), function probe, file probe.c, line 4.
+E
+E       assert -6 == 0
+E        +  where -6 = CompletedProcess(args=['/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_gen... dlsym -> 0x105de8490\nAssertion failed: (len == 28 && option == 0x04030201), function probe, file probe.c, line 4.\n').returncode
+
+test/test_regressions.py:77: AssertionError
+_ test_generated_call[signature2-assert(len == 28 && option == 0x04030201);-libfuzzer] _
+
+tmp_path = PosixPath('/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature21')
+cc = '/usr/bin/clang', fmt = 'libfuzzer'
+signature = {'params': [{'name': 'buf', 'type': 'byte *', 'size': 8}, {'name': 'option', 'type': 'int', 'size': 4}, {'name': 'len', 'type': 'int', 'size': 4}]}
+body = 'assert(len == 28 && option == 0x04030201);'
+
+    @pytest.mark.parametrize('fmt', ['afl', 'libfuzzer'])
+    @pytest.mark.parametrize('signature,body', [
+        (sig(('buf', 'byte *'), ('len', 'int'), ('flags', 'int')),
+         'assert(len == 28 && flags == 0x04030201 && buf[0] == 5);'),
+        (sig(('buf', 'const unsigned char *'), ('len', 'int')),
+         'assert(len == 32 && buf[0] == 1);'),
+        (sig(('buf', 'byte *'), ('option', 'int'), ('len', 'int')),
+         'assert(len == 28 && option == 0x04030201);'),
+        (sig(('a', 'byte *'), ('a_len', 'int'), ('b', 'byte *'), ('b_len', 'int')),
+         'assert(a_len == 16 && b_len == 16 && a[0] == 1 && b[0] == 17);'),
+        (sig(('target', 'int')), 'assert(target == 0x04030201);'),
+        (sig(('cb', 'code *')), 'assert(cb == 0);'),
+        (sig(('ctx', 'parser_ctx *')), 'assert(ctx != 0);'),
+        (sig(('flag', 'bool')), '(void)flag;'),
+    ])
+    def test_generated_call(tmp_path, cc, fmt, signature, body):
+        lib = 'libprobe.dylib' if platform.system() == 'Darwin' else 'libprobe.so'
+        engine = FuzzGenEngine()
+        engine.generate_harness(0x1000, 'probe', signature, lib, fmt,
+                                output_dir=str(tmp_path), call_mode='dlsym')
+        # A separate oracle declaration avoids relying on generator type recovery.
+        mapping = {'byte *': 'unsigned char *', 'code *': 'void (*cb)(void)'}
+        declarations = []
+        for p in signature['params']:
+            declarations.append(mapping['code *'] if p['type'] == 'code *'
+                                else mapping.get(p['type'], p['type']) + ' ' + p['name'])
+        (tmp_path/'probe.c').write_text(
+            '#include <assert.h>\n#include <stdbool.h>\ntypedef struct parser_ctx parser_ctx;\n'
+            + 'int probe(' + ', '.join(declarations) + '){' + body + 'return 0;}')
+        shared = ['-dynamiclib'] if platform.system() == 'Darwin' else ['-shared', '-fPIC']
+        r = run([cc, *shared, str(tmp_path/'probe.c'), '-o', str(tmp_path/lib)])
+        assert r.returncode == 0, r.stderr
+        cmd = [cc, '-std=c11', '-D_GNU_SOURCE', str(tmp_path/'harness_probe.c')]
+        if fmt == 'libfuzzer':
+            (tmp_path/'driver.c').write_text(
+                '#include <stdint.h>\n#include <stddef.h>\n'
+                'int LLVMFuzzerTestOneInput(const uint8_t*,size_t);\n'
+                'int main(void){uint8_t input[32];for(int i=0;i<32;i++)input[i]=i+1;'
+                'return LLVMFuzzerTestOneInput(input,32);}')
+            cmd += [str(tmp_path/'driver.c')]
+        cmd += ['-o', str(tmp_path/'harness'), '-ldl']
+        r = run(cmd)
+        assert r.returncode == 0, r.stderr
+        (tmp_path/'input').write_bytes(bytes(range(1,33)))
+        r = run([str(tmp_path/'harness'), 'input'], cwd=tmp_path)
+>       assert r.returncode == 0, r.stderr
+E       AssertionError: [fuzzgen] loaded ./libprobe.dylib (handle 0x471d7310)
+E         [fuzzgen] resolved probe via dlsym -> 0x10b3f6490
+E         Assertion failed: (len == 28 && option == 0x04030201), function probe, file probe.c, line 4.
+E
+E       assert -6 == 0
+E        +  where -6 = CompletedProcess(args=['/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_gen... dlsym -> 0x10b3f6490\nAssertion failed: (len == 28 && option == 0x04030201), function probe, file probe.c, line 4.\n').returncode
+
+test/test_regressions.py:77: AssertionError
+_ test_generated_call[signature3-assert(a_len == 16 && b_len == 16 && a[0] == 1 && b[0] == 17);-afl] _
+
+tmp_path = PosixPath('/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature30')
+cc = '/usr/bin/clang', fmt = 'afl'
+signature = {'params': [{'name': 'a', 'type': 'byte *', 'size': 8}, {'name': 'a_len', 'type': 'int', 'size': 4}, {'name': 'b', 'type': 'byte *', 'size': 8}, {'name': 'b_len', 'type': 'int', 'size': 4}]}
+body = 'assert(a_len == 16 && b_len == 16 && a[0] == 1 && b[0] == 17);'
+
+    @pytest.mark.parametrize('fmt', ['afl', 'libfuzzer'])
+    @pytest.mark.parametrize('signature,body', [
+        (sig(('buf', 'byte *'), ('len', 'int'), ('flags', 'int')),
+         'assert(len == 28 && flags == 0x04030201 && buf[0] == 5);'),
+        (sig(('buf', 'const unsigned char *'), ('len', 'int')),
+         'assert(len == 32 && buf[0] == 1);'),
+        (sig(('buf', 'byte *'), ('option', 'int'), ('len', 'int')),
+         'assert(len == 28 && option == 0x04030201);'),
+        (sig(('a', 'byte *'), ('a_len', 'int'), ('b', 'byte *'), ('b_len', 'int')),
+         'assert(a_len == 16 && b_len == 16 && a[0] == 1 && b[0] == 17);'),
+        (sig(('target', 'int')), 'assert(target == 0x04030201);'),
+        (sig(('cb', 'code *')), 'assert(cb == 0);'),
+        (sig(('ctx', 'parser_ctx *')), 'assert(ctx != 0);'),
+        (sig(('flag', 'bool')), '(void)flag;'),
+    ])
+    def test_generated_call(tmp_path, cc, fmt, signature, body):
+        lib = 'libprobe.dylib' if platform.system() == 'Darwin' else 'libprobe.so'
+        engine = FuzzGenEngine()
+        engine.generate_harness(0x1000, 'probe', signature, lib, fmt,
+                                output_dir=str(tmp_path), call_mode='dlsym')
+        # A separate oracle declaration avoids relying on generator type recovery.
+        mapping = {'byte *': 'unsigned char *', 'code *': 'void (*cb)(void)'}
+        declarations = []
+        for p in signature['params']:
+            declarations.append(mapping['code *'] if p['type'] == 'code *'
+                                else mapping.get(p['type'], p['type']) + ' ' + p['name'])
+        (tmp_path/'probe.c').write_text(
+            '#include <assert.h>\n#include <stdbool.h>\ntypedef struct parser_ctx parser_ctx;\n'
+            + 'int probe(' + ', '.join(declarations) + '){' + body + 'return 0;}')
+        shared = ['-dynamiclib'] if platform.system() == 'Darwin' else ['-shared', '-fPIC']
+        r = run([cc, *shared, str(tmp_path/'probe.c'), '-o', str(tmp_path/lib)])
+        assert r.returncode == 0, r.stderr
+        cmd = [cc, '-std=c11', '-D_GNU_SOURCE', str(tmp_path/'harness_probe.c')]
+        if fmt == 'libfuzzer':
+            (tmp_path/'driver.c').write_text(
+                '#include <stdint.h>\n#include <stddef.h>\n'
+                'int LLVMFuzzerTestOneInput(const uint8_t*,size_t);\n'
+                'int main(void){uint8_t input[32];for(int i=0;i<32;i++)input[i]=i+1;'
+                'return LLVMFuzzerTestOneInput(input,32);}')
+            cmd += [str(tmp_path/'driver.c')]
+        cmd += ['-o', str(tmp_path/'harness'), '-ldl']
+        r = run(cmd)
+>       assert r.returncode == 0, r.stderr
+E       AssertionError: /private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature30/harness_probe.c:265:9: error: redefinition of 'b_len' with a different type: 'int' vs 'size_t' (aka 'unsigned long')
+E           265 |     int b_len = 0;
+E               |         ^
+E         /private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature30/harness_probe.c:257:12: note: previous definition is here
+E           257 |     size_t b_len = (_fz_len > _fz_off) ? _fz_len - _fz_off : 0;
+E               |            ^
+E         1 error generated.
+E
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/usr/bin/clang', '-std=c11', '-D_GNU_SOURCE', '/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0l...\n  257 |     size_t b_len = (_fz_len > _fz_off) ? _fz_len - _fz_off : 0;\n      |            ^\n1 error generated.\n").returncode
+
+test/test_regressions.py:74: AssertionError
+_ test_generated_call[signature3-assert(a_len == 16 && b_len == 16 && a[0] == 1 && b[0] == 17);-libfuzzer] _
+
+tmp_path = PosixPath('/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature31')
+cc = '/usr/bin/clang', fmt = 'libfuzzer'
+signature = {'params': [{'name': 'a', 'type': 'byte *', 'size': 8}, {'name': 'a_len', 'type': 'int', 'size': 4}, {'name': 'b', 'type': 'byte *', 'size': 8}, {'name': 'b_len', 'type': 'int', 'size': 4}]}
+body = 'assert(a_len == 16 && b_len == 16 && a[0] == 1 && b[0] == 17);'
+
+    @pytest.mark.parametrize('fmt', ['afl', 'libfuzzer'])
+    @pytest.mark.parametrize('signature,body', [
+        (sig(('buf', 'byte *'), ('len', 'int'), ('flags', 'int')),
+         'assert(len == 28 && flags == 0x04030201 && buf[0] == 5);'),
+        (sig(('buf', 'const unsigned char *'), ('len', 'int')),
+         'assert(len == 32 && buf[0] == 1);'),
+        (sig(('buf', 'byte *'), ('option', 'int'), ('len', 'int')),
+         'assert(len == 28 && option == 0x04030201);'),
+        (sig(('a', 'byte *'), ('a_len', 'int'), ('b', 'byte *'), ('b_len', 'int')),
+         'assert(a_len == 16 && b_len == 16 && a[0] == 1 && b[0] == 17);'),
+        (sig(('target', 'int')), 'assert(target == 0x04030201);'),
+        (sig(('cb', 'code *')), 'assert(cb == 0);'),
+        (sig(('ctx', 'parser_ctx *')), 'assert(ctx != 0);'),
+        (sig(('flag', 'bool')), '(void)flag;'),
+    ])
+    def test_generated_call(tmp_path, cc, fmt, signature, body):
+        lib = 'libprobe.dylib' if platform.system() == 'Darwin' else 'libprobe.so'
+        engine = FuzzGenEngine()
+        engine.generate_harness(0x1000, 'probe', signature, lib, fmt,
+                                output_dir=str(tmp_path), call_mode='dlsym')
+        # A separate oracle declaration avoids relying on generator type recovery.
+        mapping = {'byte *': 'unsigned char *', 'code *': 'void (*cb)(void)'}
+        declarations = []
+        for p in signature['params']:
+            declarations.append(mapping['code *'] if p['type'] == 'code *'
+                                else mapping.get(p['type'], p['type']) + ' ' + p['name'])
+        (tmp_path/'probe.c').write_text(
+            '#include <assert.h>\n#include <stdbool.h>\ntypedef struct parser_ctx parser_ctx;\n'
+            + 'int probe(' + ', '.join(declarations) + '){' + body + 'return 0;}')
+        shared = ['-dynamiclib'] if platform.system() == 'Darwin' else ['-shared', '-fPIC']
+        r = run([cc, *shared, str(tmp_path/'probe.c'), '-o', str(tmp_path/lib)])
+        assert r.returncode == 0, r.stderr
+        cmd = [cc, '-std=c11', '-D_GNU_SOURCE', str(tmp_path/'harness_probe.c')]
+        if fmt == 'libfuzzer':
+            (tmp_path/'driver.c').write_text(
+                '#include <stdint.h>\n#include <stddef.h>\n'
+                'int LLVMFuzzerTestOneInput(const uint8_t*,size_t);\n'
+                'int main(void){uint8_t input[32];for(int i=0;i<32;i++)input[i]=i+1;'
+                'return LLVMFuzzerTestOneInput(input,32);}')
+            cmd += [str(tmp_path/'driver.c')]
+        cmd += ['-o', str(tmp_path/'harness'), '-ldl']
+        r = run(cmd)
+>       assert r.returncode == 0, r.stderr
+E       AssertionError: /private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature31/harness_probe.c:259:9: error: redefinition of 'b_len' with a different type: 'int' vs 'size_t' (aka 'unsigned long')
+E           259 |     int b_len = 0;
+E               |         ^
+E         /private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature31/harness_probe.c:251:12: note: previous definition is here
+E           251 |     size_t b_len = (_fz_len > _fz_off) ? _fz_len - _fz_off : 0;
+E               |            ^
+E         1 error generated.
+E
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/usr/bin/clang', '-std=c11', '-D_GNU_SOURCE', '/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0l...\n  251 |     size_t b_len = (_fz_len > _fz_off) ? _fz_len - _fz_off : 0;\n      |            ^\n1 error generated.\n").returncode
+
+test/test_regressions.py:74: AssertionError
+______ test_generated_call[signature4-assert(target == 0x04030201);-afl] _______
+
+tmp_path = PosixPath('/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature40')
+cc = '/usr/bin/clang', fmt = 'afl'
+signature = {'params': [{'name': 'target', 'type': 'int', 'size': 4}]}
+body = 'assert(target == 0x04030201);'
+
+    @pytest.mark.parametrize('fmt', ['afl', 'libfuzzer'])
+    @pytest.mark.parametrize('signature,body', [
+        (sig(('buf', 'byte *'), ('len', 'int'), ('flags', 'int')),
+         'assert(len == 28 && flags == 0x04030201 && buf[0] == 5);'),
+        (sig(('buf', 'const unsigned char *'), ('len', 'int')),
+         'assert(len == 32 && buf[0] == 1);'),
+        (sig(('buf', 'byte *'), ('option', 'int'), ('len', 'int')),
+         'assert(len == 28 && option == 0x04030201);'),
+        (sig(('a', 'byte *'), ('a_len', 'int'), ('b', 'byte *'), ('b_len', 'int')),
+         'assert(a_len == 16 && b_len == 16 && a[0] == 1 && b[0] == 17);'),
+        (sig(('target', 'int')), 'assert(target == 0x04030201);'),
+        (sig(('cb', 'code *')), 'assert(cb == 0);'),
+        (sig(('ctx', 'parser_ctx *')), 'assert(ctx != 0);'),
+        (sig(('flag', 'bool')), '(void)flag;'),
+    ])
+    def test_generated_call(tmp_path, cc, fmt, signature, body):
+        lib = 'libprobe.dylib' if platform.system() == 'Darwin' else 'libprobe.so'
+        engine = FuzzGenEngine()
+        engine.generate_harness(0x1000, 'probe', signature, lib, fmt,
+                                output_dir=str(tmp_path), call_mode='dlsym')
+        # A separate oracle declaration avoids relying on generator type recovery.
+        mapping = {'byte *': 'unsigned char *', 'code *': 'void (*cb)(void)'}
+        declarations = []
+        for p in signature['params']:
+            declarations.append(mapping['code *'] if p['type'] == 'code *'
+                                else mapping.get(p['type'], p['type']) + ' ' + p['name'])
+        (tmp_path/'probe.c').write_text(
+            '#include <assert.h>\n#include <stdbool.h>\ntypedef struct parser_ctx parser_ctx;\n'
+            + 'int probe(' + ', '.join(declarations) + '){' + body + 'return 0;}')
+        shared = ['-dynamiclib'] if platform.system() == 'Darwin' else ['-shared', '-fPIC']
+        r = run([cc, *shared, str(tmp_path/'probe.c'), '-o', str(tmp_path/lib)])
+        assert r.returncode == 0, r.stderr
+        cmd = [cc, '-std=c11', '-D_GNU_SOURCE', str(tmp_path/'harness_probe.c')]
+        if fmt == 'libfuzzer':
+            (tmp_path/'driver.c').write_text(
+                '#include <stdint.h>\n#include <stddef.h>\n'
+                'int LLVMFuzzerTestOneInput(const uint8_t*,size_t);\n'
+                'int main(void){uint8_t input[32];for(int i=0;i<32;i++)input[i]=i+1;'
+                'return LLVMFuzzerTestOneInput(input,32);}')
+            cmd += [str(tmp_path/'driver.c')]
+        cmd += ['-o', str(tmp_path/'harness'), '-ldl']
+        r = run(cmd)
+>       assert r.returncode == 0, r.stderr
+E       AssertionError: /private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature40/harness_probe.c:247:9: error: redefinition of 'target' with a different type: 'int' vs 'target_fn_t' (aka 'int (*)(int)')
+E           247 |     int target = 0;
+E               |         ^
+E         /private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature40/harness_probe.c:235:17: note: previous definition is here
+E           235 |     target_fn_t target = (target_fn_t)fz_resolve_target(lib);
+E               |                 ^
+E         /private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature40/harness_probe.c:251:12: error: incompatible pointer to integer conversion passing 'target_fn_t' (aka 'int (*)(int)') to parameter of type 'int' [-Wint-conversion]
+E           251 |     target(target);
+E               |            ^~~~~~
+E         2 errors generated.
+E
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/usr/bin/clang', '-std=c11', '-D_GNU_SOURCE', '/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0l...meter of type 'int' [-Wint-conversion]\n  251 |     target(target);\n      |            ^~~~~~\n2 errors generated.\n").returncode
+
+test/test_regressions.py:74: AssertionError
+_____________ test_generated_call[signature5-assert(cb == 0);-afl] _____________
+
+tmp_path = PosixPath('/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature50')
+cc = '/usr/bin/clang', fmt = 'afl'
+signature = {'params': [{'name': 'cb', 'type': 'code *', 'size': 8}]}
+body = 'assert(cb == 0);'
+
+    @pytest.mark.parametrize('fmt', ['afl', 'libfuzzer'])
+    @pytest.mark.parametrize('signature,body', [
+        (sig(('buf', 'byte *'), ('len', 'int'), ('flags', 'int')),
+         'assert(len == 28 && flags == 0x04030201 && buf[0] == 5);'),
+        (sig(('buf', 'const unsigned char *'), ('len', 'int')),
+         'assert(len == 32 && buf[0] == 1);'),
+        (sig(('buf', 'byte *'), ('option', 'int'), ('len', 'int')),
+         'assert(len == 28 && option == 0x04030201);'),
+        (sig(('a', 'byte *'), ('a_len', 'int'), ('b', 'byte *'), ('b_len', 'int')),
+         'assert(a_len == 16 && b_len == 16 && a[0] == 1 && b[0] == 17);'),
+        (sig(('target', 'int')), 'assert(target == 0x04030201);'),
+        (sig(('cb', 'code *')), 'assert(cb == 0);'),
+        (sig(('ctx', 'parser_ctx *')), 'assert(ctx != 0);'),
+        (sig(('flag', 'bool')), '(void)flag;'),
+    ])
+    def test_generated_call(tmp_path, cc, fmt, signature, body):
+        lib = 'libprobe.dylib' if platform.system() == 'Darwin' else 'libprobe.so'
+        engine = FuzzGenEngine()
+        engine.generate_harness(0x1000, 'probe', signature, lib, fmt,
+                                output_dir=str(tmp_path), call_mode='dlsym')
+        # A separate oracle declaration avoids relying on generator type recovery.
+        mapping = {'byte *': 'unsigned char *', 'code *': 'void (*cb)(void)'}
+        declarations = []
+        for p in signature['params']:
+            declarations.append(mapping['code *'] if p['type'] == 'code *'
+                                else mapping.get(p['type'], p['type']) + ' ' + p['name'])
+        (tmp_path/'probe.c').write_text(
+            '#include <assert.h>\n#include <stdbool.h>\ntypedef struct parser_ctx parser_ctx;\n'
+            + 'int probe(' + ', '.join(declarations) + '){' + body + 'return 0;}')
+        shared = ['-dynamiclib'] if platform.system() == 'Darwin' else ['-shared', '-fPIC']
+        r = run([cc, *shared, str(tmp_path/'probe.c'), '-o', str(tmp_path/lib)])
+        assert r.returncode == 0, r.stderr
+        cmd = [cc, '-std=c11', '-D_GNU_SOURCE', str(tmp_path/'harness_probe.c')]
+        if fmt == 'libfuzzer':
+            (tmp_path/'driver.c').write_text(
+                '#include <stdint.h>\n#include <stddef.h>\n'
+                'int LLVMFuzzerTestOneInput(const uint8_t*,size_t);\n'
+                'int main(void){uint8_t input[32];for(int i=0;i<32;i++)input[i]=i+1;'
+                'return LLVMFuzzerTestOneInput(input,32);}')
+            cmd += [str(tmp_path/'driver.c')]
+        cmd += ['-o', str(tmp_path/'harness'), '-ldl']
+        r = run(cmd)
+>       assert r.returncode == 0, r.stderr
+E       AssertionError: /private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature50/harness_probe.c:199:28: error: unknown type name 'code'
+E           199 | typedef int (*target_fn_t)(code * cb);
+E               |                            ^
+E         1 error generated.
+E
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/usr/bin/clang', '-std=c11', '-D_GNU_SOURCE', '/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0l...me 'code'\n  199 | typedef int (*target_fn_t)(code * cb);\n      |                            ^\n1 error generated.\n").returncode
+
+test/test_regressions.py:74: AssertionError
+__________ test_generated_call[signature5-assert(cb == 0);-libfuzzer] __________
+
+tmp_path = PosixPath('/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature51')
+cc = '/usr/bin/clang', fmt = 'libfuzzer'
+signature = {'params': [{'name': 'cb', 'type': 'code *', 'size': 8}]}
+body = 'assert(cb == 0);'
+
+    @pytest.mark.parametrize('fmt', ['afl', 'libfuzzer'])
+    @pytest.mark.parametrize('signature,body', [
+        (sig(('buf', 'byte *'), ('len', 'int'), ('flags', 'int')),
+         'assert(len == 28 && flags == 0x04030201 && buf[0] == 5);'),
+        (sig(('buf', 'const unsigned char *'), ('len', 'int')),
+         'assert(len == 32 && buf[0] == 1);'),
+        (sig(('buf', 'byte *'), ('option', 'int'), ('len', 'int')),
+         'assert(len == 28 && option == 0x04030201);'),
+        (sig(('a', 'byte *'), ('a_len', 'int'), ('b', 'byte *'), ('b_len', 'int')),
+         'assert(a_len == 16 && b_len == 16 && a[0] == 1 && b[0] == 17);'),
+        (sig(('target', 'int')), 'assert(target == 0x04030201);'),
+        (sig(('cb', 'code *')), 'assert(cb == 0);'),
+        (sig(('ctx', 'parser_ctx *')), 'assert(ctx != 0);'),
+        (sig(('flag', 'bool')), '(void)flag;'),
+    ])
+    def test_generated_call(tmp_path, cc, fmt, signature, body):
+        lib = 'libprobe.dylib' if platform.system() == 'Darwin' else 'libprobe.so'
+        engine = FuzzGenEngine()
+        engine.generate_harness(0x1000, 'probe', signature, lib, fmt,
+                                output_dir=str(tmp_path), call_mode='dlsym')
+        # A separate oracle declaration avoids relying on generator type recovery.
+        mapping = {'byte *': 'unsigned char *', 'code *': 'void (*cb)(void)'}
+        declarations = []
+        for p in signature['params']:
+            declarations.append(mapping['code *'] if p['type'] == 'code *'
+                                else mapping.get(p['type'], p['type']) + ' ' + p['name'])
+        (tmp_path/'probe.c').write_text(
+            '#include <assert.h>\n#include <stdbool.h>\ntypedef struct parser_ctx parser_ctx;\n'
+            + 'int probe(' + ', '.join(declarations) + '){' + body + 'return 0;}')
+        shared = ['-dynamiclib'] if platform.system() == 'Darwin' else ['-shared', '-fPIC']
+        r = run([cc, *shared, str(tmp_path/'probe.c'), '-o', str(tmp_path/lib)])
+        assert r.returncode == 0, r.stderr
+        cmd = [cc, '-std=c11', '-D_GNU_SOURCE', str(tmp_path/'harness_probe.c')]
+        if fmt == 'libfuzzer':
+            (tmp_path/'driver.c').write_text(
+                '#include <stdint.h>\n#include <stddef.h>\n'
+                'int LLVMFuzzerTestOneInput(const uint8_t*,size_t);\n'
+                'int main(void){uint8_t input[32];for(int i=0;i<32;i++)input[i]=i+1;'
+                'return LLVMFuzzerTestOneInput(input,32);}')
+            cmd += [str(tmp_path/'driver.c')]
+        cmd += ['-o', str(tmp_path/'harness'), '-ldl']
+        r = run(cmd)
+>       assert r.returncode == 0, r.stderr
+E       AssertionError: /private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature51/harness_probe.c:199:28: error: unknown type name 'code'
+E           199 | typedef int (*target_fn_t)(code * cb);
+E               |                            ^
+E         1 error generated.
+E
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/usr/bin/clang', '-std=c11', '-D_GNU_SOURCE', '/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0l...me 'code'\n  199 | typedef int (*target_fn_t)(code * cb);\n      |                            ^\n1 error generated.\n").returncode
+
+test/test_regressions.py:74: AssertionError
+____________ test_generated_call[signature6-assert(ctx != 0);-afl] _____________
+
+tmp_path = PosixPath('/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature60')
+cc = '/usr/bin/clang', fmt = 'afl'
+signature = {'params': [{'name': 'ctx', 'type': 'parser_ctx *', 'size': 8}]}
+body = 'assert(ctx != 0);'
+
+    @pytest.mark.parametrize('fmt', ['afl', 'libfuzzer'])
+    @pytest.mark.parametrize('signature,body', [
+        (sig(('buf', 'byte *'), ('len', 'int'), ('flags', 'int')),
+         'assert(len == 28 && flags == 0x04030201 && buf[0] == 5);'),
+        (sig(('buf', 'const unsigned char *'), ('len', 'int')),
+         'assert(len == 32 && buf[0] == 1);'),
+        (sig(('buf', 'byte *'), ('option', 'int'), ('len', 'int')),
+         'assert(len == 28 && option == 0x04030201);'),
+        (sig(('a', 'byte *'), ('a_len', 'int'), ('b', 'byte *'), ('b_len', 'int')),
+         'assert(a_len == 16 && b_len == 16 && a[0] == 1 && b[0] == 17);'),
+        (sig(('target', 'int')), 'assert(target == 0x04030201);'),
+        (sig(('cb', 'code *')), 'assert(cb == 0);'),
+        (sig(('ctx', 'parser_ctx *')), 'assert(ctx != 0);'),
+        (sig(('flag', 'bool')), '(void)flag;'),
+    ])
+    def test_generated_call(tmp_path, cc, fmt, signature, body):
+        lib = 'libprobe.dylib' if platform.system() == 'Darwin' else 'libprobe.so'
+        engine = FuzzGenEngine()
+        engine.generate_harness(0x1000, 'probe', signature, lib, fmt,
+                                output_dir=str(tmp_path), call_mode='dlsym')
+        # A separate oracle declaration avoids relying on generator type recovery.
+        mapping = {'byte *': 'unsigned char *', 'code *': 'void (*cb)(void)'}
+        declarations = []
+        for p in signature['params']:
+            declarations.append(mapping['code *'] if p['type'] == 'code *'
+                                else mapping.get(p['type'], p['type']) + ' ' + p['name'])
+        (tmp_path/'probe.c').write_text(
+            '#include <assert.h>\n#include <stdbool.h>\ntypedef struct parser_ctx parser_ctx;\n'
+            + 'int probe(' + ', '.join(declarations) + '){' + body + 'return 0;}')
+        shared = ['-dynamiclib'] if platform.system() == 'Darwin' else ['-shared', '-fPIC']
+        r = run([cc, *shared, str(tmp_path/'probe.c'), '-o', str(tmp_path/lib)])
+        assert r.returncode == 0, r.stderr
+        cmd = [cc, '-std=c11', '-D_GNU_SOURCE', str(tmp_path/'harness_probe.c')]
+        if fmt == 'libfuzzer':
+            (tmp_path/'driver.c').write_text(
+                '#include <stdint.h>\n#include <stddef.h>\n'
+                'int LLVMFuzzerTestOneInput(const uint8_t*,size_t);\n'
+                'int main(void){uint8_t input[32];for(int i=0;i<32;i++)input[i]=i+1;'
+                'return LLVMFuzzerTestOneInput(input,32);}')
+            cmd += [str(tmp_path/'driver.c')]
+        cmd += ['-o', str(tmp_path/'harness'), '-ldl']
+        r = run(cmd)
+>       assert r.returncode == 0, r.stderr
+E       AssertionError: /private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature60/harness_probe.c:199:28: error: unknown type name 'parser_ctx'
+E           199 | typedef int (*target_fn_t)(parser_ctx * ctx);
+E               |                            ^
+E         /private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature60/harness_probe.c:255:13: error: use of undeclared identifier 'parser_ctx'
+E           255 |     target((parser_ctx *)ctx);
+E               |             ^~~~~~~~~~
+E         /private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature60/harness_probe.c:255:25: error: expected expression
+E           255 |     target((parser_ctx *)ctx);
+E               |                         ^
+E         3 errors generated.
+E
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/usr/bin/clang', '-std=c11', '-D_GNU_SOURCE', '/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0l...expected expression\n  255 |     target((parser_ctx *)ctx);\n      |                         ^\n3 errors generated.\n").returncode
+
+test/test_regressions.py:74: AssertionError
+_________ test_generated_call[signature6-assert(ctx != 0);-libfuzzer] __________
+
+tmp_path = PosixPath('/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature61')
+cc = '/usr/bin/clang', fmt = 'libfuzzer'
+signature = {'params': [{'name': 'ctx', 'type': 'parser_ctx *', 'size': 8}]}
+body = 'assert(ctx != 0);'
+
+    @pytest.mark.parametrize('fmt', ['afl', 'libfuzzer'])
+    @pytest.mark.parametrize('signature,body', [
+        (sig(('buf', 'byte *'), ('len', 'int'), ('flags', 'int')),
+         'assert(len == 28 && flags == 0x04030201 && buf[0] == 5);'),
+        (sig(('buf', 'const unsigned char *'), ('len', 'int')),
+         'assert(len == 32 && buf[0] == 1);'),
+        (sig(('buf', 'byte *'), ('option', 'int'), ('len', 'int')),
+         'assert(len == 28 && option == 0x04030201);'),
+        (sig(('a', 'byte *'), ('a_len', 'int'), ('b', 'byte *'), ('b_len', 'int')),
+         'assert(a_len == 16 && b_len == 16 && a[0] == 1 && b[0] == 17);'),
+        (sig(('target', 'int')), 'assert(target == 0x04030201);'),
+        (sig(('cb', 'code *')), 'assert(cb == 0);'),
+        (sig(('ctx', 'parser_ctx *')), 'assert(ctx != 0);'),
+        (sig(('flag', 'bool')), '(void)flag;'),
+    ])
+    def test_generated_call(tmp_path, cc, fmt, signature, body):
+        lib = 'libprobe.dylib' if platform.system() == 'Darwin' else 'libprobe.so'
+        engine = FuzzGenEngine()
+        engine.generate_harness(0x1000, 'probe', signature, lib, fmt,
+                                output_dir=str(tmp_path), call_mode='dlsym')
+        # A separate oracle declaration avoids relying on generator type recovery.
+        mapping = {'byte *': 'unsigned char *', 'code *': 'void (*cb)(void)'}
+        declarations = []
+        for p in signature['params']:
+            declarations.append(mapping['code *'] if p['type'] == 'code *'
+                                else mapping.get(p['type'], p['type']) + ' ' + p['name'])
+        (tmp_path/'probe.c').write_text(
+            '#include <assert.h>\n#include <stdbool.h>\ntypedef struct parser_ctx parser_ctx;\n'
+            + 'int probe(' + ', '.join(declarations) + '){' + body + 'return 0;}')
+        shared = ['-dynamiclib'] if platform.system() == 'Darwin' else ['-shared', '-fPIC']
+        r = run([cc, *shared, str(tmp_path/'probe.c'), '-o', str(tmp_path/lib)])
+        assert r.returncode == 0, r.stderr
+        cmd = [cc, '-std=c11', '-D_GNU_SOURCE', str(tmp_path/'harness_probe.c')]
+        if fmt == 'libfuzzer':
+            (tmp_path/'driver.c').write_text(
+                '#include <stdint.h>\n#include <stddef.h>\n'
+                'int LLVMFuzzerTestOneInput(const uint8_t*,size_t);\n'
+                'int main(void){uint8_t input[32];for(int i=0;i<32;i++)input[i]=i+1;'
+                'return LLVMFuzzerTestOneInput(input,32);}')
+            cmd += [str(tmp_path/'driver.c')]
+        cmd += ['-o', str(tmp_path/'harness'), '-ldl']
+        r = run(cmd)
+>       assert r.returncode == 0, r.stderr
+E       AssertionError: /private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature61/harness_probe.c:199:28: error: unknown type name 'parser_ctx'
+E           199 | typedef int (*target_fn_t)(parser_ctx * ctx);
+E               |                            ^
+E         /private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature61/harness_probe.c:249:15: error: use of undeclared identifier 'parser_ctx'
+E           249 |     g_target((parser_ctx *)ctx);
+E               |               ^~~~~~~~~~
+E         /private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_generated_call_signature61/harness_probe.c:249:27: error: expected expression
+E           249 |     g_target((parser_ctx *)ctx);
+E               |                           ^
+E         3 errors generated.
+E
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/usr/bin/clang', '-std=c11', '-D_GNU_SOURCE', '/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0l...cted expression\n  249 |     g_target((parser_ctx *)ctx);\n      |                           ^\n3 errors generated.\n").returncode
+
+test/test_regressions.py:74: AssertionError
+_____________________________ test_length_pairing ______________________________
+
+    def test_length_pairing():
+        params = recover_params_from_ghidra(sig(('a','byte *'),('option','int'),
+            ('b','byte *'),('b_len','unsigned int'),('a_len','int')))
+>       assert params[0].length_param == 4
+E       AssertionError: assert 1 == 4
+E        +  where 1 = ParamInfo(index=0, name='a', type=<ParamType.BUFFER: 'buffer'>, c_type='uint8_t *', size=8, register=None, stack_offset=None, length_param=1, struct_layout=None).length_param
+
+test/test_regressions.py:83: AssertionError
+___________________________ test_jni_invalid_regions ___________________________
+
+tmp_path = PosixPath('/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_jni_invalid_regions0')
+cc = '/usr/bin/clang'
+jni_header = PosixPath('/Users/nongjiawu/Library/Android/sdk/ndk/28.0.12916984/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/include/jni.h')
+
+    def test_jni_invalid_regions(tmp_path, cc, jni_header):
+        shutil.copy(jni_header, tmp_path/'jni.h')
+        (tmp_path/'jni_stub.h').write_text(HarnessGenerator().generate_jni_header())
+        (tmp_path/'probe.c').write_text('''
+    #include <assert.h>
+    #include <limits.h>
+    #include "jni_stub.h"
+    int main(void) {
+        JNIEnv env = fz_jni_env();
+        jstring s = env->NewStringUTF(&env, "abc");
+        char buf[8] = {42};
+        env->GetStringUTFRegion(&env, s, -1, 1, buf);
+        assert(buf[0] == 42 && env->ExceptionCheck(&env));
+        assert(env->ExceptionOccurred(&env) != NULL);
+        env->ExceptionClear(&env);
+        assert(!env->ExceptionCheck(&env));
+        env->GetStringUTFRegion(&env, s, 1, INT_MAX, buf);
+        assert(env->ExceptionCheck(&env));
+        env->ExceptionClear(&env);
+        env->GetStringUTFRegion(&env, s, 0, 3, buf);
+        assert(!env->ExceptionCheck(&env) && memcmp(buf, "abc", 3) == 0);
+        jbyteArray arr = env->NewByteArray(&env, 3);
+        env->SetByteArrayRegion(&env, arr, 1, INT_MAX, (jbyte*)buf);
+        assert(env->ExceptionCheck(&env));
+        env->ExceptionClear(&env);
+        env->GetByteArrayRegion(&env, arr, 1, INT_MAX, (jbyte*)buf);
+        assert(env->ExceptionCheck(&env));
+        return 0;
+    }
+    ''')
+        r = run([cc, '-I'+str(tmp_path), '-fsanitize=address,undefined',
+                 str(tmp_path/'probe.c'), '-o', str(tmp_path/'probe')])
+        assert r.returncode == 0, r.stderr
+        r = run([str(tmp_path/'probe')], env={**os.environ, 'ASAN_OPTIONS':'detect_leaks=0'})
+>       assert r.returncode == 0, r.stderr
+E       AssertionError: =================================================================
+E         ==75454==ERROR: AddressSanitizer: global-buffer-overflow on address 0x00010dd02d9f at pc 0x00010e2fc219 bp 0x7ff7b2204ea0 sp 0x7ff7b2204650
+E         READ of size 1 at 0x00010dd02d9f thread T0
+E         ==75454==WARNING: Can't read from symbolizer at fd 4
+E         ==75454==WARNING: atos failed to symbolize address "0x10e2fc218"
+E         ==75454==WARNING: Can't write to symbolizer at fd 4
+E         ==75454==WARNING: external symbolizer didn't start up correctly!
+E         ==75454==WARNING: Can't write to symbolizer at fd 5
+E         ==75454==WARNING: external symbolizer didn't start up correctly!
+E         ==75454==WARNING: Can't write to symbolizer at fd 6
+E         ==75454==WARNING: Can't read from symbolizer at fd 7
+E         ==75454==WARNING: atos failed to symbolize address "0x10dcfb1cc"
+E         ==75454==WARNING: Can't write to symbolizer at fd 7
+E         ==75454==WARNING: external symbolizer didn't start up correctly!
+E         ==75454==WARNING: Failed to use and restart external symbolizer!
+E             #0 0x00010e2fc218 in __asan_memcpy+0xf48 (/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21/lib/darwin/libclang_rt.asan_osx_dynamic.dylib:x86_64h+0xa3218)
+E             #1 0x00010dcfb1cc in fz_GetStringUTFRegion+0x324 (/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_jni_invalid_regions0/probe:x86_64+0x1000031cc)
+E             #2 0x00010dcf8bbe in main+0x346 (/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_jni_invalid_regions0/probe:x86_64+0x100000bbe)
+E             #3 0x7ff80356d1c7 in start+0xca7 (/usr/lib/dyld:x86_64+0x131c7)
+E
+E         0x00010dd02d9f is located 1 bytes before global variable '_fz_pool_data' defined in '/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_jni_invalid_regions0/probe.c' (0x00010dd02da0) of size 524288
+E         0x00010dd02d9f is located 511 bytes after global variable '_fz_pool' defined in '/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_jni_invalid_regions0/probe.c' (0x00010dd023a0) of size 2048
+E         SUMMARY: AddressSanitizer: global-buffer-overflow (/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_jni_invalid_regions0/probe:x86_64+0x1000031cc) in fz_GetStringUTFRegion+0x324
+E         Shadow bytes around the buggy address:
+E           0x00010dd02b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+E           0x00010dd02b80: 00 00 00 00 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+E           0x00010dd02c00: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+E           0x00010dd02c80: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+E           0x00010dd02d00: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+E         =>0x00010dd02d80: f9 f9 f9[f9]00 00 00 00 00 00 00 00 00 00 00 00
+E           0x00010dd02e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+E           0x00010dd02e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+E           0x00010dd02f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+E           0x00010dd02f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+E           0x00010dd03000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+E         Shadow byte legend (one shadow byte represents 8 application bytes):
+E           Addressable:           00
+E           Partially addressable: 01 02 03 04 05 06 07
+E           Heap left redzone:       fa
+E           Freed heap region:       fd
+E           Stack left redzone:      f1
+E           Stack mid redzone:       f2
+E           Stack right redzone:     f3
+E           Stack after return:      f5
+E           Stack use after scope:   f8
+E           Global redzone:          f9
+E           Global init order:       f6
+E           Poisoned by user:        f7
+E           Container overflow:      fc
+E           Array cookie:            ac
+E           Intra object redzone:    bb
+E           ASan internal:           fe
+E           Left alloca redzone:     ca
+E           Right alloca redzone:    cb
+E         ==75454==ABORTING
+E
+E       assert -6 == 0
+E        +  where -6 = CompletedProcess(args=['/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_jni... bb\n  ASan internal:           fe\n  Left alloca redzone:     ca\n  Right alloca redzone:    cb\n==75454==ABORTING\n').returncode
+
+test/test_regressions.py:131: AssertionError
+________________________ test_device_script_system_bash ________________________
+
+tmp_path = PosixPath('/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_device_script_system_bash0')
+
+    def test_device_script_system_bash(tmp_path):
+        (tmp_path/'run.sh').write_text(HarnessGenerator().generate_run_script('probe','libprobe.so','afl'))
+        for name in ['harness_probe','libprobe.so','libdependency.so']:
+            (tmp_path/name).touch()
+        (tmp_path/'seeds').mkdir()
+        (tmp_path/'seeds/seed').write_bytes(b'abc')
+        log = tmp_path/'adb.log'
+        (tmp_path/'adb').write_text('#!/bin/sh\nprintf "%s\\n" "$*" >> "$ADB_LOG"\n'
+                                   'if [ "$2" = getprop ]; then echo arm64-v8a; fi\n')
+        (tmp_path/'adb').chmod(0o755)
+        r = run(['/bin/bash', str(tmp_path/'run.sh')], env={**os.environ,
+                'PATH': str(tmp_path)+':/usr/bin:/bin', 'ADB_LOG':str(log)})
+>       assert r.returncode == 0 and not r.stderr, r.stderr
+E       AssertionError: /private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_device_script_system_bash0/run.sh: line 39: libprobe.so: syntax error: invalid arithmetic operator (error token is ".so")
+E         /private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_device_script_system_bash0/run.sh: line 44: libdependency.so: syntax error: invalid arithmetic operator (error token is ".so")
+E
+E       assert (0 == 0 and not '/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_device_script_system_bash0...ipt_system_bash0/run.sh: line 44: libdependency.so: syntax error: invalid arithmetic operator (error token is ".so")\n')
+E        +  where 0 = CompletedProcess(args=['/bin/bash', '/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pyte...pt_system_bash0/run.sh: line 44: libdependency.so: syntax error: invalid arithmetic operator (error token is ".so")\n').returncode
+E        +  and   '/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pytest-1/test_device_script_system_bash0...ipt_system_bash0/run.sh: line 44: libdependency.so: syntax error: invalid arithmetic operator (error token is ".so")\n' = CompletedProcess(args=['/bin/bash', '/private/var/folders/y4/t8zsn2c92gn2zc25zwzzn0lm0000gn/T/pytest-of-nongjiawu/pyte...pt_system_bash0/run.sh: line 44: libdependency.so: syntax error: invalid arithmetic operator (error token is ".so")\n').stderr
+
+test/test_regressions.py:146: AssertionError
+=========================== short test summary info ============================
+FAILED test/test_regressions.py::test_generated_call[signature0-assert(len == 28 && flags == 0x04030201 && buf[0] == 5);-afl]
+FAILED test/test_regressions.py::test_generated_call[signature0-assert(len == 28 && flags == 0x04030201 && buf[0] == 5);-libfuzzer]
+FAILED test/test_regressions.py::test_generated_call[signature1-assert(len == 32 && buf[0] == 1);-afl]
+FAILED test/test_regressions.py::test_generated_call[signature1-assert(len == 32 && buf[0] == 1);-libfuzzer]
+FAILED test/test_regressions.py::test_generated_call[signature2-assert(len == 28 && option == 0x04030201);-afl]
+FAILED test/test_regressions.py::test_generated_call[signature2-assert(len == 28 && option == 0x04030201);-libfuzzer]
+FAILED test/test_regressions.py::test_generated_call[signature3-assert(a_len == 16 && b_len == 16 && a[0] == 1 && b[0] == 17);-afl]
+FAILED test/test_regressions.py::test_generated_call[signature3-assert(a_len == 16 && b_len == 16 && a[0] == 1 && b[0] == 17);-libfuzzer]
+FAILED test/test_regressions.py::test_generated_call[signature4-assert(target == 0x04030201);-afl]
+FAILED test/test_regressions.py::test_generated_call[signature5-assert(cb == 0);-afl]
+FAILED test/test_regressions.py::test_generated_call[signature5-assert(cb == 0);-libfuzzer]
+FAILED test/test_regressions.py::test_generated_call[signature6-assert(ctx != 0);-afl]
+FAILED test/test_regressions.py::test_generated_call[signature6-assert(ctx != 0);-libfuzzer]
+FAILED test/test_regressions.py::test_length_pairing - AssertionError: assert...
+FAILED test/test_regressions.py::test_jni_invalid_regions - AssertionError: =...
+FAILED test/test_regressions.py::test_device_script_system_bash - AssertionEr...
+16 failed, 3 passed in 6.55s

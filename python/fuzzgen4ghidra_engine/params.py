@@ -22,6 +22,9 @@ INT_TYPES = frozenset({
     "int8_t", "uint8_t", "int16_t", "uint16_t", "int32_t", "uint32_t",
     "int64_t", "uint64_t", "size_t", "ssize_t", "off_t", "bool",
     "BOOL", "DWORD", "WORD", "BYTE",
+    "unsigned int", "unsigned short", "unsigned long", "unsigned char",
+    "signed int", "signed short", "signed long", "signed char",
+    "long long", "unsigned long long",
     "undefined", "undefined1", "undefined2", "undefined4", "undefined8",
 })
 
@@ -32,17 +35,26 @@ BUFFER_PTR_TYPES = frozenset({
     "uint8_t *", "int8_t *", "unsigned char *",
 })
 
-LENGTH_NAMES = re.compile(r"(len|length|size|count|num|sz|cb|n|nbytes)", re.IGNORECASE)
+LENGTH_NAMES = frozenset({"len", "length", "size", "count", "num", "sz", "cb", "n", "nbytes"})
+
+
+def _normalize_type(type_str: str) -> str:
+    return " ".join(type_str.replace("*", " * ").split())
+
+
+def _unqualified(type_str: str) -> str:
+    return " ".join(t for t in _normalize_type(type_str).split()
+                    if t not in {"const", "volatile", "restrict"})
 
 
 def _classify_type(type_str: str) -> ParamType:
-    stripped = type_str.strip()
+    stripped = _unqualified(type_str)
+    if stripped == "code *":
+        return ParamType.FUNC_PTR
     if stripped in BUFFER_PTR_TYPES:
         return ParamType.BUFFER
-    if stripped == "code *" or stripped.startswith("code *"):
-        return ParamType.FUNC_PTR
-    if stripped.endswith(" *") or stripped.endswith(" * *"):
-        base = stripped.rstrip(" *").strip()
+    if stripped.endswith(" *"):
+        base = stripped[:-2]
         if base in INT_TYPES:
             return ParamType.BUFFER
         return ParamType.STRUCT_PTR
@@ -53,35 +65,50 @@ def _classify_type(type_str: str) -> ParamType:
     return ParamType.UNKNOWN
 
 
-def _find_length_param(params_raw: list[dict], buffer_index: int) -> int | None:
-    for i, p in enumerate(params_raw):
-        if i == buffer_index:
+def _name_tokens(name: str) -> list[str]:
+    return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", name).lower().split("_")
+
+
+def _pair_lengths(params: list[ParamInfo]) -> None:
+    buffers = [p for p in params if p.type == ParamType.BUFFER]
+    lengths = [p for p in params if p.type == ParamType.INT
+               and _name_tokens(p.name)[-1] in LENGTH_NAMES]
+    used = set()
+    # Explicit buffer-name prefixes win even when parameters are non-adjacent.
+    for buf in buffers:
+        for length in lengths:
+            if length.index not in used and _name_tokens(length.name)[:-1] == _name_tokens(buf.name):
+                buf.length_param = length.index
+                used.add(length.index)
+                break
+    # Generic lengths pair with the nearest buffer; never reuse a length.
+    for buf in buffers:
+        if buf.length_param is not None:
             continue
-        if LENGTH_NAMES.search(p.get("name", "")):
-            t = _classify_type(p.get("type", ""))
-            if t == ParamType.INT:
-                return i
-    return None
+        candidates = [p for p in lengths if p.index not in used
+                      and len(_name_tokens(p.name)) == 1]
+        if candidates:
+            length = min(candidates, key=lambda p: (abs(p.index-buf.index), p.index < buf.index))
+            buf.length_param = length.index
+            used.add(length.index)
 
 
 def recover_params_from_ghidra(ghidra_sig: dict) -> list[ParamInfo]:
     params_raw = ghidra_sig.get("params", [])
     results: list[ParamInfo] = []
     for i, p in enumerate(params_raw):
-        raw_type = p.get("type", "int")
-        base = raw_type.rstrip(" *")
-        ptr_suffix = raw_type[len(base):]
-        c_type = GHIDRA_TO_C_TYPE.get(base, base) + ptr_suffix
+        raw_type = _normalize_type(p.get("type", "int"))
+        c_type = re.sub(r"\b\w+\b", lambda m: GHIDRA_TO_C_TYPE.get(m[0], m[0]), raw_type)
         ptype = _classify_type(raw_type)
-        length_param = None
-        if ptype == ParamType.BUFFER:
-            length_param = _find_length_param(params_raw, i)
+        if ptype == ParamType.FUNC_PTR:
+            c_type = "fz_callback_t"
         results.append(ParamInfo(
             index=i,
             name=p.get("name", f"arg{i}"),
             type=ptype,
             c_type=c_type,
             size=p.get("size", 4),
-            length_param=length_param,
+            length_param=None,
         ))
+    _pair_lengths(results)
     return results

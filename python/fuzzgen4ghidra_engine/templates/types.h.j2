@@ -6,6 +6,16 @@
 #define FUZZGEN_TYPES_H
 
 #include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <sys/types.h>
+
+typedef void (*fz_callback_t)(void);
+
+/* Opaque pointees: layout is unknown; harness storage remains a raw-byte stub. */
+{% for name in opaque_types %}
+typedef struct {{ name }} {{ name }};
+{% endfor %}
 
 {% for struct in structs %}
 typedef struct {

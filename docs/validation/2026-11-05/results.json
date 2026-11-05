@@ -1,0 +1,302 @@
+[
+  {
+    "case": "basic",
+    "fmt": "afl",
+    "compile": 0,
+    "error": "",
+    "runtime": 0,
+    "stdout": "32:1\n",
+    "stderr": "[fuzzgen] loaded ./libprobe.dylib (handle 0x471d7310)\n[fuzzgen] resolved probe via dlsym -> 0x10b468450\n"
+  },
+  {
+    "case": "basic",
+    "fmt": "libfuzzer",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "scalar_after_buffer",
+    "fmt": "afl",
+    "compile": 0,
+    "error": "",
+    "runtime": 0,
+    "stdout": "32:0\n",
+    "stderr": "[fuzzgen] loaded ./libprobe.dylib (handle 0x471d7310)\n[fuzzgen] resolved probe via dlsym -> 0x10ca9e460\n"
+  },
+  {
+    "case": "scalar_after_buffer",
+    "fmt": "libfuzzer",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "multiple_buffers",
+    "fmt": "afl",
+    "compile": 1,
+    "error": "/private/tmp/fuzzgen-validation-20261105/multiple_buffers_afl/harness_probe.c:265:9: error: redefinition of 'b_len' with a different type: 'int' vs 'size_t' (aka 'unsigned long')\n  265 |     int b_len = 0;\n      |         ^\n/private/tmp/fuzzgen-validation-20261105/multiple_buffers_afl/harness_probe.c:257:12: note: previous definition is here\n  257 |     size_t b_len = (_fz_len > _fz_off) ? _fz_len - _fz_off : 0;\n      |            ^\n1 error generated.\n"
+  },
+  {
+    "case": "multiple_buffers",
+    "fmt": "libfuzzer",
+    "compile": 1,
+    "error": "/private/tmp/fuzzgen-validation-20261105/multiple_buffers_libfuzzer/harness_probe.c:259:9: error: redefinition of 'b_len' with a different type: 'int' vs 'size_t' (aka 'unsigned long')\n  259 |     int b_len = 0;\n      |         ^\n/private/tmp/fuzzgen-validation-20261105/multiple_buffers_libfuzzer/harness_probe.c:251:12: note: previous definition is here\n  251 |     size_t b_len = (_fz_len > _fz_off) ? _fz_len - _fz_off : 0;\n      |            ^\n1 error generated.\n"
+  },
+  {
+    "case": "buffer_named_length",
+    "fmt": "afl",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "buffer_named_length",
+    "fmt": "libfuzzer",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "local_collision",
+    "fmt": "afl",
+    "compile": 1,
+    "error": "/private/tmp/fuzzgen-validation-20261105/local_collision_afl/harness_probe.c:247:9: error: redefinition of 'target' with a different type: 'int' vs 'target_fn_t' (aka 'int (*)(int)')\n  247 |     int target = 0;\n      |         ^\n/private/tmp/fuzzgen-validation-20261105/local_collision_afl/harness_probe.c:235:17: note: previous definition is here\n  235 |     target_fn_t target = (target_fn_t)fz_resolve_target(lib);\n      |                 ^\n/private/tmp/fuzzgen-validation-20261105/local_collision_afl/harness_probe.c:251:12: error: incompatible pointer to integer conversion passing 'target_fn_t' (aka 'int (*)(int)') to parameter of type 'int' [-Wint-conversion]\n  251 |     target(target);\n      |            ^~~~~~\n2 errors generated.\n"
+  },
+  {
+    "case": "local_collision",
+    "fmt": "libfuzzer",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "const_buffer",
+    "fmt": "afl",
+    "compile": 0,
+    "error": "",
+    "runtime": 0,
+    "stdout": "0\n",
+    "stderr": "[fuzzgen] loaded ./libprobe.dylib (handle 0x471d7310)\n[fuzzgen] resolved probe via dlsym -> 0x10ce45460\n"
+  },
+  {
+    "case": "const_buffer",
+    "fmt": "libfuzzer",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "bool",
+    "fmt": "afl",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "bool",
+    "fmt": "libfuzzer",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "callback",
+    "fmt": "afl",
+    "compile": 1,
+    "error": "/private/tmp/fuzzgen-validation-20261105/callback_afl/harness_probe.c:199:28: error: unknown type name 'code'\n  199 | typedef int (*target_fn_t)(code * cb);\n      |                            ^\n1 error generated.\n"
+  },
+  {
+    "case": "callback",
+    "fmt": "libfuzzer",
+    "compile": 1,
+    "error": "/private/tmp/fuzzgen-validation-20261105/callback_libfuzzer/harness_probe.c:199:28: error: unknown type name 'code'\n  199 | typedef int (*target_fn_t)(code * cb);\n      |                            ^\n1 error generated.\n"
+  },
+  {
+    "case": "custom_struct",
+    "fmt": "afl",
+    "compile": 1,
+    "error": "/private/tmp/fuzzgen-validation-20261105/custom_struct_afl/harness_probe.c:199:28: error: unknown type name 'parser_ctx'\n  199 | typedef int (*target_fn_t)(parser_ctx * ctx);\n      |                            ^\n/private/tmp/fuzzgen-validation-20261105/custom_struct_afl/harness_probe.c:255:13: error: use of undeclared identifier 'parser_ctx'\n  255 |     target((parser_ctx *)ctx);\n      |             ^~~~~~~~~~\n/private/tmp/fuzzgen-validation-20261105/custom_struct_afl/harness_probe.c:255:25: error: expected expression\n  255 |     target((parser_ctx *)ctx);\n      |                         ^\n3 errors generated.\n"
+  },
+  {
+    "case": "custom_struct",
+    "fmt": "libfuzzer",
+    "compile": 1,
+    "error": "/private/tmp/fuzzgen-validation-20261105/custom_struct_libfuzzer/harness_probe.c:199:28: error: unknown type name 'parser_ctx'\n  199 | typedef int (*target_fn_t)(parser_ctx * ctx);\n      |                            ^\n/private/tmp/fuzzgen-validation-20261105/custom_struct_libfuzzer/harness_probe.c:249:15: error: use of undeclared identifier 'parser_ctx'\n  249 |     g_target((parser_ctx *)ctx);\n      |               ^~~~~~~~~~\n/private/tmp/fuzzgen-validation-20261105/custom_struct_libfuzzer/harness_probe.c:249:27: error: expected expression\n  249 |     g_target((parser_ctx *)ctx);\n      |                           ^\n3 errors generated.\n"
+  },
+  {
+    "case": "count_false_match",
+    "fmt": "afl",
+    "compile": 0,
+    "error": "",
+    "runtime": 0,
+    "stdout": "32:0\n",
+    "stderr": "[fuzzgen] loaded ./libprobe.dylib (handle 0x471d7310)\n[fuzzgen] resolved probe via dlsym -> 0x1032d4460\n"
+  },
+  {
+    "case": "count_false_match",
+    "fmt": "libfuzzer",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "aarch64-linux-android",
+    "fmt": "afl",
+    "jni": "off",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "aarch64-linux-android",
+    "fmt": "afl",
+    "jni": "env",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "aarch64-linux-android",
+    "fmt": "afl",
+    "jni": "onload",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "aarch64-linux-android",
+    "fmt": "libfuzzer",
+    "jni": "off",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "aarch64-linux-android",
+    "fmt": "libfuzzer",
+    "jni": "env",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "aarch64-linux-android",
+    "fmt": "libfuzzer",
+    "jni": "onload",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "armv7a-linux-androideabi",
+    "fmt": "afl",
+    "jni": "off",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "armv7a-linux-androideabi",
+    "fmt": "afl",
+    "jni": "env",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "armv7a-linux-androideabi",
+    "fmt": "afl",
+    "jni": "onload",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "armv7a-linux-androideabi",
+    "fmt": "libfuzzer",
+    "jni": "off",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "armv7a-linux-androideabi",
+    "fmt": "libfuzzer",
+    "jni": "env",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "armv7a-linux-androideabi",
+    "fmt": "libfuzzer",
+    "jni": "onload",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "x86_64-linux-android",
+    "fmt": "afl",
+    "jni": "off",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "x86_64-linux-android",
+    "fmt": "afl",
+    "jni": "env",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "x86_64-linux-android",
+    "fmt": "afl",
+    "jni": "onload",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "x86_64-linux-android",
+    "fmt": "libfuzzer",
+    "jni": "off",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "x86_64-linux-android",
+    "fmt": "libfuzzer",
+    "jni": "env",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "x86_64-linux-android",
+    "fmt": "libfuzzer",
+    "jni": "onload",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "i686-linux-android",
+    "fmt": "afl",
+    "jni": "off",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "i686-linux-android",
+    "fmt": "afl",
+    "jni": "env",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "i686-linux-android",
+    "fmt": "afl",
+    "jni": "onload",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "i686-linux-android",
+    "fmt": "libfuzzer",
+    "jni": "off",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "i686-linux-android",
+    "fmt": "libfuzzer",
+    "jni": "env",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "i686-linux-android",
+    "fmt": "libfuzzer",
+    "jni": "onload",
+    "compile": 0,
+    "error": ""
+  }
+]

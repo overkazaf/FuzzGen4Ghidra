@@ -28,6 +28,11 @@ HANDLERS = {
         target_binary=p["target_binary"],
         fmt=p.get("fmt", "afl"),
         output_dir=p.get("output_dir"),
+        target_platform=p.get("target_platform", "auto"),
+        ndk_api=p.get("ndk_api"),
+        call_mode=p.get("call_mode", "auto"),
+        jni_mode=p.get("jni_mode", "auto"),
+        run_jni_onload=p.get("run_jni_onload"),
     ),
 }
 

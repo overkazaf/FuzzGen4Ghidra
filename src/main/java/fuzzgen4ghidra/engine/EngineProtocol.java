@@ -93,6 +93,24 @@ public class EngineProtocol {
 	public static Command generateHarnessCmd(
 			String funcAddr, String funcName, String ghidraSignatureJson,
 			String targetBinary, String fmt, String outputDir) {
+		return generateHarnessCmd(funcAddr, funcName, ghidraSignatureJson, targetBinary,
+			fmt, outputDir, null, null, null, null, null);
+	}
+
+	/**
+	 * Full harness generation command.
+	 *
+	 * @param targetPlatform "auto", "android" or "host" (null = auto)
+	 * @param ndkApi         Android API level for the NDK toolchain (null = default)
+	 * @param callMode       "auto", "dlsym" or "address" (null = auto)
+	 * @param jniMode        "auto", "off", "env" or "onload" (null = auto)
+	 * @param runJniOnload   call JNI_OnLoad before fuzzing (null = auto)
+	 */
+	public static Command generateHarnessCmd(
+			String funcAddr, String funcName, String ghidraSignatureJson,
+			String targetBinary, String fmt, String outputDir,
+			String targetPlatform, Integer ndkApi, String callMode,
+			String jniMode, Boolean runJniOnload) {
 		Map<String, Object> params = new HashMap<>();
 		params.put("func_addr", funcAddr);
 		params.put("func_name", funcName);
@@ -101,6 +119,21 @@ public class EngineProtocol {
 		params.put("fmt", fmt);
 		if (outputDir != null) {
 			params.put("output_dir", outputDir);
+		}
+		if (targetPlatform != null && !targetPlatform.isBlank()) {
+			params.put("target_platform", targetPlatform);
+		}
+		if (ndkApi != null && ndkApi > 0) {
+			params.put("ndk_api", ndkApi);
+		}
+		if (callMode != null && !callMode.isBlank()) {
+			params.put("call_mode", callMode);
+		}
+		if (jniMode != null && !jniMode.isBlank()) {
+			params.put("jni_mode", jniMode);
+		}
+		if (runJniOnload != null) {
+			params.put("run_jni_onload", runJniOnload);
 		}
 		return new Command("generate_harness", params);
 	}

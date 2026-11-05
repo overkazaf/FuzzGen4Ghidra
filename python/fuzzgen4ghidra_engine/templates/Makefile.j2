@@ -1,31 +1,98 @@
 # FuzzGen4Ghidra - Makefile for {{ func_name }} harness
 # Target: {{ target_binary }}
+#
+# Platform: {{ platform }}
+{% if android %}
+#   {{ android_abi }} / {{ triple }} / Android API {{ ndk_api }}
+#
+# Cross-compile with the Android NDK:
+#   make NDK=$ANDROID_NDK_HOME          (or export ANDROID_NDK_HOME)
+#   make NDK=... API={{ ndk_api }} TRIPLE={{ triple }}
+#
+# The resulting binary is {{ android_abi }} and must run on an Android device
+# or emulator (./run_on_device.sh pushes and starts it).
+{% endif %}
 
+HARNESS = harness_{{ func_name }}
+SRC     = harness_{{ func_name }}.c
+DEPS    = types.h{% if include_jni %} jni_stub.h{% endif %}
+
+{% if android %}
+# ---------------------------------------------------------------------------
+# Android NDK cross-compilation
+# ---------------------------------------------------------------------------
+NDK ?= $(ANDROID_NDK_HOME)
+API ?= {{ ndk_api }}
+TRIPLE ?= {{ triple }}
+
+ifeq ($(strip $(NDK)),)
+$(error Android NDK not found - set ANDROID_NDK_HOME or pass NDK=/path/to/ndk)
+endif
+
+# The NDK ships host binaries in darwin-x86_64 / linux-x86_64 only.
+HOST_TAG ?= $(shell uname -s | tr '[:upper:]' '[:lower:]')-x86_64
+NDK_BIN  := $(NDK)/toolchains/llvm/prebuilt/$(HOST_TAG)/bin
+CC       := $(NDK_BIN)/$(TRIPLE)$(API)-clang
+
+CFLAGS  = -g -O1 -fno-omit-frame-pointer -fPIC -Wall \
+          -fsanitize=address,undefined
+LDFLAGS = -lm -ldl
+
+{% if fmt == "afl" %}
+# Plain (uninstrumented) build.  AFL++ on-device needs an AFL++ runtime
+# cross-compiled for {{ android_abi }}; without that, either run this binary
+# under AFL++ in QEMU mode or use `make FMT=libfuzzer`.
+all: $(HARNESS)
+
+$(HARNESS): $(SRC) $(DEPS)
+	$(CC) $(CFLAGS) -o $@ $(SRC) $(LDFLAGS)
+
+fuzz: $(HARNESS)
+	@echo "Cross-compiled harness: $$(file $(HARNESS) 2>/dev/null || true)"
+	@echo "Run it on a device with ./run_on_device.sh"
+
+{% elif fmt == "libfuzzer" %}
+# libFuzzer + ASan is the supported on-device backend: the NDK compiler-rt
+# already contains the runtime for {{ android_abi }}.
+all: $(HARNESS)
+
+$(HARNESS): $(SRC) $(DEPS)
+	$(CC) $(CFLAGS) -fsanitize=fuzzer,address -o $@ $(SRC) $(LDFLAGS)
+
+fuzz: $(HARNESS)
+	@echo "Run the libFuzzer target on a device with ./run_on_device.sh"
+
+{% endif %}
+clean:
+	rm -f $(HARNESS)
+
+.PHONY: all fuzz clean
+
+{% else %}
+# ---------------------------------------------------------------------------
+# Host build
+# ---------------------------------------------------------------------------
 CC ?= gcc
 CFLAGS = -g -O0 -fsanitize=address,undefined -fno-omit-frame-pointer
 LDFLAGS = -ldl
-TARGET_LIB = {{ target_binary }}
 
 {% if fmt == "afl" %}
 AFL_CC ?= afl-gcc
-HARNESS = harness_{{ func_name }}
 
 all: $(HARNESS)
 
-$(HARNESS): harness_{{ func_name }}.c types.h
-	$(AFL_CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+$(HARNESS): $(SRC) $(DEPS)
+	$(AFL_CC) $(CFLAGS) -o $@ $(SRC) $(LDFLAGS)
 
 fuzz: $(HARNESS)
 	@mkdir -p findings
 	afl-fuzz -i seeds -o findings -- ./$(HARNESS) @@
 
 {% elif fmt == "libfuzzer" %}
-HARNESS = harness_{{ func_name }}
-
 all: $(HARNESS)
 
-$(HARNESS): harness_{{ func_name }}.c types.h
-	clang $(CFLAGS) -fsanitize=fuzzer -o $@ $< $(LDFLAGS)
+$(HARNESS): $(SRC) $(DEPS)
+	clang $(CFLAGS) -fsanitize=fuzzer -o $@ $(SRC) $(LDFLAGS)
 
 fuzz: $(HARNESS)
 	@mkdir -p corpus
@@ -36,3 +103,4 @@ clean:
 	rm -f $(HARNESS)
 
 .PHONY: all fuzz clean
+{% endif %}

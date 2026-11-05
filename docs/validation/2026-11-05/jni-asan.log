@@ -1,0 +1,53 @@
+=================================================================
+==73257==ERROR: AddressSanitizer: global-buffer-overflow on address 0x00010dcba79f at pc 0x00010e2b4219 bp 0x7ff7b2247160 sp 0x7ff7b2246910
+READ of size 1 at 0x00010dcba79f thread T0
+==73257==WARNING: external symbolizer didn't start up correctly!
+==73257==WARNING: Can't write to symbolizer at fd 4
+==73257==WARNING: Can't read from symbolizer at fd 5
+==73257==WARNING: atos failed to symbolize address "0x10e2b4218"
+==73257==WARNING: Can't write to symbolizer at fd 5
+==73257==WARNING: external symbolizer didn't start up correctly!
+==73257==WARNING: Can't write to symbolizer at fd 6
+==73257==WARNING: external symbolizer didn't start up correctly!
+==73257==WARNING: Can't write to symbolizer at fd 7
+==73257==WARNING: Failed to use and restart external symbolizer!
+    #0 0x00010e2b4218 in __asan_memcpy+0xf48 (/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21/lib/darwin/libclang_rt.asan_osx_dynamic.dylib:x86_64h+0xa3218)
+    #1 0x00010dcb72c5 in fz_GetStringUTFRegion+0x155 (/private/tmp/fuzzgen-validation-20261105/jni_asan/probe:x86_64+0x1000012c5)
+    #2 0x00010dcb69a4 in main+0x184 (/private/tmp/fuzzgen-validation-20261105/jni_asan/probe:x86_64+0x1000009a4)
+    #3 0x7ff80356d1c7 in start+0xca7 (/usr/lib/dyld:x86_64+0x131c7)
+
+0x00010dcba79f is located 1 bytes before global variable '_fz_pool_data' defined in '/private/tmp/fuzzgen-validation-20261105/jni_asan/probe.c' (0x00010dcba7a0) of size 524288
+0x00010dcba79f is located 511 bytes after global variable '_fz_pool' defined in '/private/tmp/fuzzgen-validation-20261105/jni_asan/probe.c' (0x00010dcb9da0) of size 2048
+SUMMARY: AddressSanitizer: global-buffer-overflow (/private/tmp/fuzzgen-validation-20261105/jni_asan/probe:x86_64+0x1000012c5) in fz_GetStringUTFRegion+0x155
+Shadow bytes around the buggy address:
+  0x00010dcba500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x00010dcba580: 00 00 00 00 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x00010dcba600: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x00010dcba680: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x00010dcba700: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+=>0x00010dcba780: f9 f9 f9[f9]00 00 00 00 00 00 00 00 00 00 00 00
+  0x00010dcba800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x00010dcba880: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x00010dcba900: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x00010dcba980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x00010dcbaa00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==73257==ABORTING

@@ -14,7 +14,10 @@ FuzzGen4Ghidra is a Ghidra extension that automatically generates AFL++ and libF
 - **Parameter Recovery** — Extracts parameter types from Ghidra's decompiler (buffer, int, struct pointer, function pointer)
 - **Harness Generation** — Generates complete C harness code with input deserialization, `dlopen`/`dlsym` target loading, and a Makefile
 - **Dual Format** — Supports both AFL++ (file-based) and libFuzzer (`LLVMFuzzerTestOneInput`) harness styles
-- **Preview & Export** — In-Ghidra preview dialog with syntax highlighting, format switching, and save-to-directory
+- **Android NDK cross-compilation** — Detects Android ELF targets and emits harnesses the NDK can build for the device
+- **Local-symbol resolution** — Calls non-exported functions via load bias + ELF virtual address (Android libraries often export only `JNI_OnLoad`)
+- **JNI stubs** — Synthesises `JNIEnv`/`JavaVM` so `Java_*` natives and `JNI_OnLoad` are directly fuzzable
+- **Preview & Export** — In-Ghidra preview dialog with format/platform/resolution switching and one-click bundle export
 
 ### Architecture
 
@@ -677,6 +680,120 @@ make asan     # rebuild with ASan (catches UAF and heap overflow)
 4. Right-click high-score functions → **Generate Fuzz Harness**
 5. Compile harness with ASan → start fuzzing
 
+### Android NDK Cross-Compilation and Stubs
+
+Android `.so` files break two assumptions of a desktop harness, and the
+generator handles both:
+
+1. **macOS/Linux cannot `dlopen` an ARM64 bionic library** — the harness has to
+   run on a device or emulator.
+2. **Hardened libraries usually export only `JNI_OnLoad`** — the function worth
+   fuzzing is a local symbol that `dlsym` cannot reach.
+
+#### Platform detection
+
+`engine.init()` inspects the ELF with angr/CLE and marks it Android when its
+`NEEDED` entries include `liblog.so`/`libandroid.so` or it carries a
+`.note.android.ident` section. The detected arch selects the NDK triple and ABI
+(`AARCH64` → `aarch64-linux-android` / `arm64-v8a`, `ARMEL`/`ARMHF` →
+`armv7a-linux-androideabi` / `armeabi-v7a`, and so on).
+
+#### Resolving the function (call mode)
+
+| mode | behaviour |
+|---|---|
+| `auto` (default) | `dlsym` for exported symbols, `load_bias + ELF vaddr` otherwise |
+| `dlsym` | `dlsym` only; a miss is a hard error |
+| `address` | address computation only |
+
+The load bias is recovered from an exported anchor, inlined into the harness:
+
+```c
+load_bias = (uintptr_t)dlsym(handle, "JNI_OnLoad") - 0x597b0;  /* anchor st_value */
+target    = load_bias + 0x12345;                                /* target st_value */
+```
+
+If no anchor resolves, the harness falls back to `dl_iterate_phdr()` matching the
+module basename. **Resolution failures print `FATAL` and `exit(2)`** — the old
+silent `if (!g_target) return 0;` (fuzzing nothing while reporting zero crashes)
+is gone.
+
+#### JNI stubs
+
+Android libraries initialise in `JNI_OnLoad` and often register natives with
+`RegisterNatives`. The generated `jni_stub.h`:
+
+- fills **every** slot of `JNINativeInterface` / `JNIInvokeInterface` with a
+  no-op returning 0/NULL, so unknown callbacks do not abort the run
+- implements the ones libraries actually use: `GetVersion`, `FindClass`,
+  `GetMethodID`/`GetFieldID`, `NewStringUTF`/`GetStringUTFChars`,
+  `NewByteArray`/`Get`/`SetByteArrayRegion`, `RegisterNatives` (returns 0 =
+  success), the exception API, `GetJavaVM`, `GetEnv`/`AttachCurrentThread`
+- backs strings and arrays with a static pool so repeated calls do not trip
+  ASan's leak checker
+
+JNI modes:
+
+| mode | use |
+|---|---|
+| `auto` (default) | `JNI_OnLoad` → `onload`; `Java_*` → `env`; anything else → `off` |
+| `env` | synthesises `(JNIEnv *env, jobject thiz, ...)`; the two JNI arguments come from the stub, the rest is fuzzed |
+| `onload` | calls `(JavaVM *, void *)`; an initialiser, so it runs exactly once |
+| `off` | plain C function |
+
+"Run JNI_OnLoad first" (on by default for Android) invokes the library's
+`JNI_OnLoad` before the target so `RegisterNatives` and global init happen.
+
+> `jni.h` comes from the NDK, so JNI stubs are only generated for Android
+> targets. Selecting a JNI mode for a host target falls back to `off` with a
+> warning instead of emitting a harness that cannot compile.
+
+#### Build and run
+
+```bash
+export ANDROID_NDK_HOME=~/Library/Android/sdk/ndk/28.0.12916984
+make                  # host tag + $(TRIPLE)$(API)-clang picked automatically
+# optional: make API=23 TRIPLE=aarch64-linux-android
+
+./run_on_device.sh    # adb push target .so + harness + seeds, then run
+# FUZZGEN_TARGET=/path/to/libfoo.so ./run_on_device.sh
+```
+
+The Android Makefile branch uses:
+
+```make
+CC      := $(NDK)/toolchains/llvm/prebuilt/$(HOST_TAG)/bin/$(TRIPLE)$(API)-clang
+CFLAGS  = -g -O1 -fno-omit-frame-pointer -fPIC -Wall -fsanitize=address,undefined
+# libFuzzer additionally links -fsanitize=fuzzer,address -lm -ldl
+```
+
+Verified with NDK r28: `ELF 64-bit LSB pie executable, ARM aarch64,
+interpreter /system/bin/linker64`.
+
+#### Worked example (Qishui / luna samples)
+
+`data/qishui/` holds research samples (see that directory's README).
+`libmetasec_ml_REAL_RESTORED.so` exports only `JNI_OnLoad` at `0x597b0`:
+
+- `JNI_OnLoad` → `call_mode=dlsym`, `jni_mode=onload`
+- a local function such as `0x597c0` → `call_mode=address`, `run_jni_onload=true`
+
+Both compile with `aarch64-linux-android21-clang`.
+
+#### Limitations
+
+- **Prebuilt `.so` files are not instrumented**: ASan reliably catches heap
+  errors that go through its allocator, but stack/global overflows inside the
+  library are not instrumented unless you rebuild it from source with
+  `-fsanitize=address`.
+- **The JNI stub is permissive**: unimplemented callbacks return 0/NULL, which
+  may make the library bail out early. If coverage stalls right after
+  `JNI_OnLoad`, add the specific method it needs to `jni_stub.h`.
+- **AFL++ cross-compilation**: `afl-clang-fast` needs an AFL++ runtime built
+  for the target ABI. Without one, use libFuzzer (recommended) or QEMU mode.
+- **Signatures come from Ghidra's decompiler** and are heuristic; fix the
+  prototype in Ghidra before generating for better results.
+
 ### Tests
 
 ```bash
@@ -687,7 +804,17 @@ PYTHONPATH=python python -m pytest test/ -v --ignore=test/test_integration.py
 PYTHONPATH=python .venv/bin/python3 -m pytest test/ -v
 ```
 
-25 tests covering protocol, models, scorer, params, harness generation, engine, and end-to-end integration.
+70 tests covering protocol, models, scorer, params, platform detection, harness
+generation (host + Android/JNI), engine, and end-to-end integration.
+The regression suite compiles and executes both harness formats against small
+shared libraries. Set `ANDROID_NDK_HOME` to include JNI/ASan tests; a host C
+compiler is required for compilation tests. Missing tools cause explicit skips.
+
+Input decoding consumes independent scalars first, then raw struct storage,
+then divides remaining bytes between buffers. Length parameters are derived
+from their own buffer. Existing corpora for mixed signatures may need regeneration.
+Opaque struct pointers receive forward declarations only: their 256-byte raw
+storage does not reconstruct the target's actual object layout or invariants.
 
 ### Project Structure
 
@@ -724,7 +851,7 @@ FuzzGen4Ghidra/
 │       ├── libnative_parser.c  # 5 vulnerability patterns
 │       ├── audit_demo.c        # Automated audit driver
 │       └── Makefile
-├── test/                     # 25 tests
+├── test/                     # 70 tests
 ├── build.gradle
 └── extension.properties
 ```

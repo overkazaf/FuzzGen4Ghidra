@@ -1,0 +1,305 @@
+[
+  {
+    "case": "basic",
+    "fmt": "afl",
+    "compile": 0,
+    "error": "",
+    "runtime": 0,
+    "stdout": "32:1\n",
+    "stderr": "[fuzzgen] loaded ./libprobe.dylib (handle 0x471d7310)\n[fuzzgen] resolved probe via dlsym -> 0x101a91450\n"
+  },
+  {
+    "case": "basic",
+    "fmt": "libfuzzer",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "scalar_after_buffer",
+    "fmt": "afl",
+    "compile": 0,
+    "error": "",
+    "runtime": 0,
+    "stdout": "28:67305985\n",
+    "stderr": "[fuzzgen] loaded ./libprobe.dylib (handle 0x471d7310)\n[fuzzgen] resolved probe via dlsym -> 0x10a3a8460\n"
+  },
+  {
+    "case": "scalar_after_buffer",
+    "fmt": "libfuzzer",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "multiple_buffers",
+    "fmt": "afl",
+    "compile": 0,
+    "error": "",
+    "runtime": 0,
+    "stdout": "16:16:1\n",
+    "stderr": "[fuzzgen] loaded ./libprobe.dylib (handle 0x471d7310)\n[fuzzgen] resolved probe via dlsym -> 0x102111450\n"
+  },
+  {
+    "case": "multiple_buffers",
+    "fmt": "libfuzzer",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "buffer_named_length",
+    "fmt": "afl",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "buffer_named_length",
+    "fmt": "libfuzzer",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "local_collision",
+    "fmt": "afl",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "local_collision",
+    "fmt": "libfuzzer",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "const_buffer",
+    "fmt": "afl",
+    "compile": 0,
+    "error": "",
+    "runtime": 0,
+    "stdout": "32\n",
+    "stderr": "[fuzzgen] loaded ./libprobe.dylib (handle 0x471d7310)\n[fuzzgen] resolved probe via dlsym -> 0x1050a0450\n"
+  },
+  {
+    "case": "const_buffer",
+    "fmt": "libfuzzer",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "bool",
+    "fmt": "afl",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "bool",
+    "fmt": "libfuzzer",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "callback",
+    "fmt": "afl",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "callback",
+    "fmt": "libfuzzer",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "custom_struct",
+    "fmt": "afl",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "custom_struct",
+    "fmt": "libfuzzer",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "count_false_match",
+    "fmt": "afl",
+    "compile": 0,
+    "error": "",
+    "runtime": 0,
+    "stdout": "67305985:28\n",
+    "stderr": "[fuzzgen] loaded ./libprobe.dylib (handle 0x471d7310)\n[fuzzgen] resolved probe via dlsym -> 0x1056ac460\n"
+  },
+  {
+    "case": "count_false_match",
+    "fmt": "libfuzzer",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "aarch64-linux-android",
+    "fmt": "afl",
+    "jni": "off",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "aarch64-linux-android",
+    "fmt": "afl",
+    "jni": "env",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "aarch64-linux-android",
+    "fmt": "afl",
+    "jni": "onload",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "aarch64-linux-android",
+    "fmt": "libfuzzer",
+    "jni": "off",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "aarch64-linux-android",
+    "fmt": "libfuzzer",
+    "jni": "env",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "aarch64-linux-android",
+    "fmt": "libfuzzer",
+    "jni": "onload",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "armv7a-linux-androideabi",
+    "fmt": "afl",
+    "jni": "off",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "armv7a-linux-androideabi",
+    "fmt": "afl",
+    "jni": "env",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "armv7a-linux-androideabi",
+    "fmt": "afl",
+    "jni": "onload",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "armv7a-linux-androideabi",
+    "fmt": "libfuzzer",
+    "jni": "off",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "armv7a-linux-androideabi",
+    "fmt": "libfuzzer",
+    "jni": "env",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "armv7a-linux-androideabi",
+    "fmt": "libfuzzer",
+    "jni": "onload",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "x86_64-linux-android",
+    "fmt": "afl",
+    "jni": "off",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "x86_64-linux-android",
+    "fmt": "afl",
+    "jni": "env",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "x86_64-linux-android",
+    "fmt": "afl",
+    "jni": "onload",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "x86_64-linux-android",
+    "fmt": "libfuzzer",
+    "jni": "off",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "x86_64-linux-android",
+    "fmt": "libfuzzer",
+    "jni": "env",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "x86_64-linux-android",
+    "fmt": "libfuzzer",
+    "jni": "onload",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "i686-linux-android",
+    "fmt": "afl",
+    "jni": "off",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "i686-linux-android",
+    "fmt": "afl",
+    "jni": "env",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "i686-linux-android",
+    "fmt": "afl",
+    "jni": "onload",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "i686-linux-android",
+    "fmt": "libfuzzer",
+    "jni": "off",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "i686-linux-android",
+    "fmt": "libfuzzer",
+    "jni": "env",
+    "compile": 0,
+    "error": ""
+  },
+  {
+    "case": "i686-linux-android",
+    "fmt": "libfuzzer",
+    "jni": "onload",
+    "compile": 0,
+    "error": ""
+  }
+]

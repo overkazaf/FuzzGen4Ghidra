@@ -1,0 +1,8 @@
+......................................................................   [100%]
+=============================== warnings summary ===============================
+test/test_engine.py::test_init_nonexistent_binary
+  /Users/nongjiawu/playground/research/re-plugins/.venv/lib/python3.12/site-packages/unicorn/unicorn.py:8: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+70 passed, 1 warning in 11.00s
